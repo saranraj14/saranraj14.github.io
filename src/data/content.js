@@ -33,7 +33,7 @@ export const education = [
     year: '2017 – 2021',
     title: 'B.E in Civil Engineering',
     place: 'Bannari Amman Institute of Technology, Sathyamangalam',
-    score: '8.59 CGPA / 10 (upto 6th sem)',
+    score: '8.6 CGPA / 10 ',
   },
   {
     year: '2015 – 2017',
