@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Portfolio Ledger</title>
+<style>
+  :root{
+    --bg:#F6F4EE;
+    --panel:#FFFFFF;
+    --panel-2:#F0EDE3;
+    --line:#DFD9C8;
+    --ink:#22262B;
+    --ink-dim:#767065;
+    --gold:#A9782F;
+    --gold-dim:#C9A24B;
+    --green:#1E8E4E;
+    --red:#C0392B;
+    --mono:'IBM Plex Mono','SFMono-Regular',Consolas,monospace;
+    --sans:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:var(--sans);
+    padding:28px 20px 60px;
+  }
+  .wrap{max-width:980px;margin:0 auto;}
+
+  .masthead{
+    display:flex;justify-content:space-between;align-items:flex-end;
+    border-bottom:2px solid var(--gold-dim);
+    padding-bottom:14px;margin-bottom:22px;
+  }
+  .masthead h1{
+    font-family:var(--mono);
+    font-size:20px;letter-spacing:1px;text-transform:uppercase;
+    margin:0 0 4px;color:var(--gold);
+  }
+  .masthead .sub{color:var(--ink-dim);font-size:12.5px;}
+  .stamp{
+    font-family:var(--mono);font-size:11px;color:var(--ink-dim);
+    text-align:right;line-height:1.5;
+  }
+  #asof{color:var(--gold);}
+
+  .panel{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:6px;
+    margin-bottom:22px;
+    overflow:hidden;
+    box-shadow:0 1px 2px rgba(34,38,43,0.04);
+  }
+  .panel-head{
+    padding:12px 16px;border-bottom:1px solid var(--line);
+    display:flex;justify-content:space-between;align-items:center;
+    background:var(--panel-2);
+  }
+  .panel-head h2{
+    font-size:13px;text-transform:uppercase;letter-spacing:1.2px;
+    margin:0;color:var(--ink);font-weight:600;
+  }
+  .panel-head .tag{font-family:var(--mono);font-size:11px;color:var(--ink-dim);}
+  .panel-body{padding:16px;}
+
+  textarea{
+    width:100%;min-height:110px;background:#FBFAF6;color:var(--ink);
+    border:1px solid var(--line);border-radius:4px;padding:10px;
+    font-family:var(--mono);font-size:12px;resize:vertical;
+  }
+  .btn-row{display:flex;gap:10px;margin-top:10px;align-items:center;}
+  button{
+    background:var(--gold);color:#FFFFFF;border:none;border-radius:4px;
+    padding:9px 16px;font-weight:600;font-size:13px;cursor:pointer;
+    font-family:var(--sans);
+  }
+  button:hover{background:#8f632470;background:#95692a;}
+  button.ghost{
+    background:transparent;color:var(--ink-dim);border:1px solid var(--line);
+    font-weight:500;
+  }
+  button.ghost:hover{color:var(--ink);border-color:var(--gold-dim);}
+  .hint{color:var(--ink-dim);font-size:11.5px;margin-top:8px;}
+
+  table{width:100%;border-collapse:collapse;font-size:13px;}
+  th{
+    text-align:right;font-family:var(--mono);font-size:10.5px;
+    text-transform:uppercase;letter-spacing:0.6px;color:var(--ink-dim);
+    padding:8px 10px;border-bottom:1px solid var(--line);font-weight:500;
+  }
+  th:first-child, td:first-child{text-align:left;}
+  td{
+    text-align:right;padding:9px 10px;font-family:var(--mono);
+    border-bottom:1px solid #ECE8DC;font-size:12.5px;
+  }
+  tr:last-child td{border-bottom:none;}
+  tbody tr:hover{background:#FAF8F1;}
+  td.sym{font-family:var(--sans);font-weight:600;letter-spacing:0.3px;}
+  td.sector-name{font-family:var(--sans);color:var(--ink);}
+  .up{color:var(--green);}
+  .down{color:var(--red);}
+  tfoot td{
+    border-top:2px solid var(--gold-dim);font-weight:700;
+    color:var(--gold);background:var(--panel-2);
+  }
+
+  .barcell{display:flex;align-items:center;gap:10px;justify-content:flex-end;}
+  .bar-track{flex:1;max-width:140px;height:6px;background:#EBE6D8;border-radius:3px;overflow:hidden;}
+  .bar-fill{height:100%;background:var(--gold);}
+
+  input.qty-add{
+    width:70px;background:#FBFAF6;border:1px solid var(--line);color:var(--ink);
+    font-family:var(--mono);font-size:12.5px;padding:5px 6px;border-radius:4px;
+    text-align:right;
+  }
+  input.qty-add:focus{outline:1px solid var(--gold-dim);}
+  .empty{color:var(--ink-dim);font-size:12.5px;padding:20px;text-align:center;font-family:var(--sans);}
+  .sector-edit{
+    width:110px;background:#FBFAF6;border:1px solid var(--line);color:var(--ink-dim);
+    font-family:var(--sans);font-size:11.5px;padding:4px 6px;border-radius:4px;
+  }
+  select.sector-edit{cursor:pointer;}
+  .foot-note{color:var(--ink-dim);font-size:11px;text-align:center;margin-top:18px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="masthead">
+    <div>
+      <h1>&#8377; Portfolio Ledger</h1>
+      <div class="sub">Paste your holdings snapshot below to build the tables</div>
+    </div>
+    <div class="stamp">Last parsed<br><span id="asof">&mdash;</span></div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-head"><h2>Paste Holdings Data</h2><span class="tag">input</span></div>
+    <div class="panel-body">
+      <textarea id="rawInput" placeholder="Paste your holdings snapshot here — either the ₹-concatenated text or the tab-separated table copied straight from your broker's holdings screen. Both formats are auto-detected."></textarea>
+      <div class="btn-row">
+        <button id="parseBtn">Build tables</button>
+        <button class="ghost" id="sampleBtn">Load sample</button>
+      </div>
+      <div class="hint" id="parseMsg"></div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-head"><h2>1 · Current Holdings</h2><span class="tag" id="holdCount"></span></div>
+    <div class="panel-body" style="overflow-x:auto;">
+      <table id="holdingsTable">
+        <thead><tr>
+          <th>Symbol</th><th>Qty</th><th>Buy Avg</th><th>Buy Value</th>
+          <th>LTP</th><th>Present Value</th><th>P&amp;L</th><th>P&amp;L %</th>
+        </tr></thead>
+        <tbody><tr><td colspan="8" class="empty">No data yet — paste your holdings above.</td></tr></tbody>
+        <tfoot></tfoot>
+      </table>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-head"><h2>2 · Sector Allocation</h2><span class="tag">by invested value</span></div>
+    <div class="panel-body" style="overflow-x:auto;">
+      <table id="sectorTable">
+        <thead><tr><th>Sector</th><th>Invested Value</th><th>Weightage</th></tr></thead>
+        <tbody><tr><td colspan="3" class="empty">Sector breakdown appears here after parsing.</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-head"><h2>3 · Add Shares — Average Price Simulator</h2><span class="tag">what-if</span></div>
+    <div class="panel-body" style="overflow-x:auto;">
+      <table id="simTable">
+        <thead><tr>
+          <th>Symbol</th><th>Current Qty</th><th>Current Avg</th><th>LTP</th>
+          <th>Add Qty</th><th>New Qty</th><th>Avg Price Change</th><th>New Avg Price</th><th>New Buy Value</th>
+        </tr></thead>
+        <tbody><tr><td colspan="9" class="empty">Simulator appears here after parsing.</td></tr></tbody>
+      </table>
+      <div class="hint">Enter how many extra shares of a stock you'd buy today at its current LTP — the new average buy price updates live, starting from your recorded Buy Avg (not Buy Value ÷ Qty, which can drift from Buy Avg after a demerger, bonus issue, or split reallocates cost basis — Buy Avg is treated as the reliable per-share figure here).</div>
+
+      <div style="margin-top:20px;border-top:1px solid var(--line);padding-top:16px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+          <h3 style="margin:0;font-size:12px;text-transform:uppercase;letter-spacing:1px;color:var(--ink-dim);font-weight:600;">Updated Sector Allocation (after adds)</h3>
+          <span class="tag">by invested value</span>
+        </div>
+        <table id="simSectorTable">
+          <thead><tr><th>Sector</th><th>Current Invested</th><th>Updated Invested</th><th>New Weightage</th></tr></thead>
+          <tbody><tr><td colspan="4" class="empty">Add share quantities above to see the updated mix.</td></tr></tbody>
+        </table>
+        <div class="hint">Recalculates live as you change the Add Qty column above — shows how your sector mix shifts if you go through with those buys.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="foot-note">Sector tags are best-effort guesses for NSE/BSE symbols — click a sector tag to correct it; corrections apply instantly to the weightage table.</div>
+</div>
+
+<script>
+// ---------- Sector reference map (editable) ----------
+// Extend this as new symbols show up. Fallback = "Uncategorized".
+const SECTOR_MAP = {
+  "ARE&M": "Auto Components",
+  "DRREDDY": "Pharmaceuticals",
+  "FEDERALBNK": "Banking",
+  "HDFCBANK": "Banking",
+  "HEROMOTOCO": "Automobile",
+  "IDFCFIRSTB": "Banking",
+  "INDUSINDBK": "Banking",
+  "INFY": "IT Services",
+  "ITBEES": "IT Services",
+  "ITC": "FMCG",
+  "ITCHOTELS": "Hotels & Hospitality",
+  "JYOTHYLAB": "FMCG",
+  "MANAPPURAM": "NBFC (Gold Loan)",
+  "MUTHOOTFIN": "NBFC (Gold Loan)",
+  "NATCOPHARM": "Pharmaceuticals",
+  "SOUTHBANK": "Banking",
+  "TCS": "IT Services",
+  "TMCV": "Automobile",
+  "TMPV": "Automobile",
+  "ZYDUSLIFE": "Pharmaceuticals"
+};
+const SECTOR_OPTIONS = [...new Set(Object.values(SECTOR_MAP))].concat(["Uncategorized"]).sort();
+const sectorOverrides = {}; // symbol -> sector, user corrections this session
+
+const SAMPLE = `ARE&M
+  3
+5\t863.77\t4,318.85\t919.80\t4,599.00\t280.15\t+6.49%
+DRREDDY
+  2
+4\t1,215.59\t4,862.35\t1,187.30\t4,749.20\t-113.15\t-2.33%
+FEDERALBNK
+  2
+2\t193.82\t387.64\t350.75\t701.50\t313.86\t+80.97%
+HDFCBANK
+5\t823.81\t4,119.05\t725.80\t3,629.00\t-490.05\t-11.90%
+IDFCFIRSTB
+5\t69.63\t348.14\t85.80\t429.00\t80.86\t+23.23%
+INDUSINDBK
+  9
+12\t833.50\t10,002.00\t1,010.50\t12,126.00\t2,124.00\t+21.24%
+INFY
+9\t1,238.21\t11,143.90\t1,126.65\t10,139.85\t-1,004.05\t-9.01%
+ITBEES
+5\t31.23\t156.14\t33.84\t169.20\t13.06\t+8.36%
+ITC
+  15
+36\t346.87\t12,487.29\t268.60\t9,669.60\t-2,817.69\t-22.56%
+ITCHOTELS
+  1
+1\t589.43\t589.43\t166.55\t166.55\t-422.88\t-71.74%
+JYOTHYLAB
+  1
+8\t304.17\t2,433.35\t212.13\t1,697.04\t-736.31\t-30.26%
+MANAPPURAM
+  30
+30\t179.72\t5,391.57\t367.70\t11,031.00\t5,639.43\t+104.60%
+MUTHOOTFIN
+2\t2,914.20\t5,828.40\t3,200.00\t6,400.00\t571.60\t+9.81%
+NATCOPHARM
+  18
+28\t972.44\t27,228.35\t870.80\t24,382.40\t-2,845.95\t-10.45%
+SOUTHBANK
+  98
+137\t28.23\t3,867.03\t45.66\t6,255.42\t2,388.39\t+61.76%
+TCS
+  1
+6\t2,617.07\t15,702.40\t2,284.50\t13,707.00\t-1,995.40\t-12.71%
+TMCV
+  15
+15\t273.59\t4,103.78\t476.00\t7,140.00\t3,036.22\t+73.99%
+TMPV
+  22
+25\t505.57\t16,178.18\t312.80\t7,820.00\t-8,358.18\t-51.66%
+ZYDUSLIFE
+5\t926.97\t4,634.85\t1,097.10\t5,485.50\t850.65\t+18.35%`;
+
+let holdings = [];
+let addQtyState = []; // parallel array to `holdings`: extra qty the user is considering buying, per row
+
+function num(s){ return parseFloat(String(s).replace(/,/g,'')); }
+function inr(n, forceSign){
+  const sign = n < 0 ? '-' : (forceSign ? '+' : '');
+  return sign + '\u20b9' + Math.abs(n).toLocaleString('en-IN', {minimumFractionDigits:2, maximumFractionDigits:2});
+}
+function pct(n, forceSign){
+  const sign = n < 0 ? '-' : (forceSign ? '+' : '');
+  return sign + Math.abs(n).toFixed(2) + '%';
+}
+
+function parseHoldingsConcatenated(raw){
+  const re = /([A-Za-z&]+)(\d+)\u20b9([\d,]+\.\d\d)\u20b9([\d,]+\.\d\d)\u20b9([\d,]+\.\d\d)\u20b9([\d,]+\.\d\d)([+\-])\u20b9([\d,]+\.\d\d)([+\-])([\d.]+)%/g;
+  const out = [];
+  let m;
+  while((m = re.exec(raw)) !== null){
+    out.push({
+      symbol: m[1].toUpperCase(),
+      qty: num(m[2]),
+      buyAvg: num(m[3]),
+      buyValue: num(m[4]),
+      ltp: num(m[5]),
+      presentValue: num(m[6]),
+      pnl: (m[7]==='-'?-1:1) * num(m[8]),
+      pnlPct: (m[9]==='-'?-1:1) * num(m[10])
+    });
+  }
+  return out;
+}
+
+function parseHoldingsTabular(raw){
+  const lines = raw.split(/\r?\n/).map(l=>l.trim()).filter(Boolean);
+  const symbolRe = /^[A-Za-z&]+$/;
+  const blocks = [];
+  let current = null;
+  lines.forEach(line=>{
+    if(symbolRe.test(line)){
+      current = {symbol: line.toUpperCase(), tokens: []};
+      blocks.push(current);
+    } else if(current){
+      let parts = line.split(/\t+|\s{2,}/).map(s=>s.trim()).filter(Boolean);
+      if(!parts.length) parts = line.split(/\s+/).filter(Boolean);
+      current.tokens.push(...parts);
+    }
+  });
+  const out = [];
+  blocks.forEach(b=>{
+    if(b.tokens.length >= 7){
+      const t = b.tokens.slice(-7);
+      out.push({
+        symbol: b.symbol,
+        qty: num(t[0]),
+        buyAvg: num(t[1]),
+        buyValue: num(t[2]),
+        ltp: num(t[3]),
+        presentValue: num(t[4]),
+        pnl: num(t[5]),
+        pnlPct: num(t[6])
+      });
+    }
+  });
+  return out;
+}
+
+function parseHoldings(raw){
+  if(raw.indexOf('\u20b9') !== -1){
+    return parseHoldingsConcatenated(raw);
+  }
+  return parseHoldingsTabular(raw);
+}
+
+function sectorFor(symbol){
+  return sectorOverrides[symbol] || SECTOR_MAP[symbol] || "Uncategorized";
+}
+
+function renderHoldings(){
+  const tbody = document.querySelector('#holdingsTable tbody');
+  const tfoot = document.querySelector('#holdingsTable tfoot');
+  document.getElementById('holdCount').textContent = holdings.length + ' stocks';
+  if(!holdings.length){
+    tbody.innerHTML = '<tr><td colspan="8" class="empty">No data yet — paste your holdings above.</td></tr>';
+    tfoot.innerHTML = '';
+    return;
+  }
+  tbody.innerHTML = holdings.map(h => `
+    <tr>
+      <td class="sym">${h.symbol}</td>
+      <td>${h.qty}</td>
+      <td>${inr(h.buyAvg)}</td>
+      <td>${inr(h.buyValue)}</td>
+      <td>${inr(h.ltp)}</td>
+      <td>${inr(h.presentValue)}</td>
+      <td class="${h.pnl>=0?'up':'down'}">${inr(h.pnl, true)}</td>
+      <td class="${h.pnlPct>=0?'up':'down'}">${pct(h.pnlPct, true)}</td>
+    </tr>`).join('');
+  const totBuy = holdings.reduce((a,h)=>a+h.buyValue,0);
+  const totPresent = holdings.reduce((a,h)=>a+h.presentValue,0);
+  const totPnl = totPresent - totBuy;
+  const totPnlPct = totBuy ? (totPnl/totBuy*100) : 0;
+  tfoot.innerHTML = `<tr>
+    <td>Total</td><td></td><td></td><td>${inr(totBuy)}</td><td></td>
+    <td>${inr(totPresent)}</td>
+    <td class="${totPnl>=0?'up':'down'}">${inr(totPnl, true)}</td>
+    <td class="${totPnlPct>=0?'up':'down'}">${pct(totPnlPct, true)}</td>
+  </tr>`;
+}
+
+function renderSectors(){
+  const tbody = document.querySelector('#sectorTable tbody');
+  if(!holdings.length){
+    tbody.innerHTML = '<tr><td colspan="3" class="empty">Sector breakdown appears here after parsing.</td></tr>';
+    return;
+  }
+  const totals = {};
+  const totalAll = holdings.reduce((a,h)=>a+h.buyValue,0);
+  holdings.forEach(h=>{
+    const s = sectorFor(h.symbol);
+    totals[s] = (totals[s]||0) + h.buyValue;
+  });
+  const rows = Object.entries(totals).sort((a,b)=>b[1]-a[1]);
+  const maxW = Math.max(...rows.map(r=>r[1]/totalAll*100));
+  tbody.innerHTML = rows.map(([sector,val])=>{
+    const w = totalAll ? (val/totalAll*100) : 0;
+    return `<tr>
+      <td class="sector-name">${sector}</td>
+      <td>${inr(val)}</td>
+      <td><div class="barcell">
+        <span>${w.toFixed(1)}%</span>
+        <div class="bar-track"><div class="bar-fill" style="width:${(w/maxW*100).toFixed(0)}%"></div></div>
+      </div></td>
+    </tr>`;
+  }).join('');
+}
+
+function avgChangeHTML(delta){
+  if(Math.abs(delta) < 0.005) return '<span style="color:var(--ink-dim);">&mdash; no change</span>';
+  if(delta > 0) return `<span class="down">&#9650; +${inr(delta)}</span>`;
+  return `<span class="up">&#9660; ${inr(delta)}</span>`;
+}
+
+function renderSimulator(){
+  const tbody = document.querySelector('#simTable tbody');
+  addQtyState = holdings.map(()=>0);
+  if(!holdings.length){
+    tbody.innerHTML = '<tr><td colspan="9" class="empty">Simulator appears here after parsing.</td></tr>';
+    renderSimSectors();
+    return;
+  }
+  tbody.innerHTML = holdings.map((h,i)=>`
+    <tr data-i="${i}">
+      <td class="sym">${h.symbol}</td>
+      <td>${h.qty}</td>
+      <td>${inr(h.buyAvg)}</td>
+      <td>${inr(h.ltp)}</td>
+      <td><input type="number" min="0" step="1" class="qty-add" data-i="${i}" placeholder="0"></td>
+      <td class="new-qty">${h.qty}</td>
+      <td class="avg-change">${avgChangeHTML(0)}</td>
+      <td class="new-avg">${inr(h.buyAvg)}</td>
+      <td class="new-value">${inr(h.qty * h.buyAvg)}</td>
+    </tr>`).join('');
+
+  tbody.querySelectorAll('.qty-add').forEach(inp=>{
+    inp.addEventListener('input', (e)=>{
+      const i = +e.target.dataset.i;
+      const h = holdings[i];
+      const addQty = Math.max(0, parseFloat(e.target.value) || 0);
+      const newQty = h.qty + addQty;
+      const newValue = (h.qty * h.buyAvg) + addQty * h.ltp;
+      const newAvg = newQty ? newValue / newQty : 0;
+      addQtyState[i] = addQty;
+      const row = e.target.closest('tr');
+      row.querySelector('.new-qty').textContent = newQty;
+      row.querySelector('.avg-change').innerHTML = avgChangeHTML(newAvg - h.buyAvg);
+      row.querySelector('.new-avg').textContent = inr(newAvg);
+      row.querySelector('.new-value').textContent = inr(newValue);
+      renderSimSectors();
+    });
+  });
+
+  renderSimSectors();
+}
+
+function renderSimSectors(){
+  const tbody = document.querySelector('#simSectorTable tbody');
+  if(!holdings.length){
+    tbody.innerHTML = '<tr><td colspan="4" class="empty">Add share quantities above to see the updated mix.</td></tr>';
+    return;
+  }
+  const current = {};
+  const updated = {};
+  holdings.forEach((h,i)=>{
+    const s = sectorFor(h.symbol);
+    const addQty = addQtyState[i] || 0;
+    const newInvested = h.buyValue + addQty * h.ltp;
+    current[s] = (current[s]||0) + h.buyValue;
+    updated[s] = (updated[s]||0) + newInvested;
+  });
+  const totalCurrent = Object.values(current).reduce((a,v)=>a+v,0);
+  const totalUpdated = Object.values(updated).reduce((a,v)=>a+v,0);
+  const sectors = Object.keys(updated).sort((a,b)=>updated[b]-updated[a]);
+  tbody.innerHTML = sectors.map(s=>{
+    const cur = current[s]||0;
+    const upd = updated[s]||0;
+    const w = totalUpdated ? (upd/totalUpdated*100) : 0;
+    const changed = Math.abs(upd-cur) > 0.005;
+    return `<tr>
+      <td class="sector-name">${s}</td>
+      <td>${inr(cur)}</td>
+      <td class="${changed?'up':''}">${inr(upd)}</td>
+      <td>${w.toFixed(1)}%</td>
+    </tr>`;
+  }).join('');
+}
+
+function renderAll(){
+  renderHoldings();
+  renderSectors();
+  renderSimulator();
+}
+
+document.getElementById('parseBtn').addEventListener('click', ()=>{
+  const raw = document.getElementById('rawInput').value.trim();
+  const msg = document.getElementById('parseMsg');
+  if(!raw){ msg.textContent = 'Paste your holdings text first.'; return; }
+  const parsed = parseHoldings(raw);
+  if(!parsed.length){
+    msg.textContent = "Couldn't find any rows in that format — check it matches Symbol/Qty/Buy Avg/Buy Value/LTP/Present Value/P&L/P&L% with no separators.";
+    return;
+  }
+  holdings = parsed;
+  msg.textContent = `Parsed ${parsed.length} holdings.`;
+  document.getElementById('asof').textContent = new Date().toLocaleString('en-IN', {dateStyle:'medium', timeStyle:'short'});
+  renderAll();
+});
+
+document.getElementById('sampleBtn').addEventListener('click', ()=>{
+  document.getElementById('rawInput').value = SAMPLE;
+});
+
+window.addEventListener('DOMContentLoaded', ()=>{
+  document.getElementById('rawInput').value = SAMPLE;
+  document.getElementById('parseBtn').click();
+});
+</script>
+</body>
+</html>
