@@ -1,1 +1,1935 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"/><link rel="icon" href="/favicon.ico"/><meta name="viewport" content="width=device-width,initial-scale=1"/><meta name="theme-color" content="#000000"/><meta name="description" content="Web site created using create-react-app"/><link rel="apple-touch-icon" href="/logo192.png"/><link rel="manifest" href="/manifest.json"/><title>React App</title><script defer="defer" src="/static/js/main.154119d6.js"></script><link href="/static/css/main.f855e6bc.css" rel="stylesheet"></head><body><noscript>You need to enable JavaScript to run this app.</noscript><div id="root"></div></body></html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Portfolio Ledger</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%230066B1'/%3E%3Ctext x='32' y='45' font-size='36' font-family='Georgia,serif' fill='white' text-anchor='middle'%3E%E2%82%B9%3C/text%3E%3C/svg%3E">
+<style>
+  :root{
+    --glass-bg: rgba(255,255,255,0.7);
+    --glass-bg-strong: rgba(255,255,255,0.85);
+    --glass-border: rgba(0,0,0,0.08);
+    --glass-border-top: rgba(255,255,255,0.9);
+    --glass-blur: 20px;
+    --glass-saturate: 100%;
+    --radius-sm: 14px;
+    --radius-lg: 24px;
+    --glass-shadow: 0 8px 28px rgba(0,0,0,0.06);
+    --ink: #1d1d1f;
+    --ink-dim: rgba(29,29,31,0.6);
+    --accent: #0066B1;
+    --accent-dim: #4A9FD6;
+    --accent-text: #ffffff;
+    --green: #1E8E4E;
+    --red: #E7222E;
+    --spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+    --font-system: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", system-ui, sans-serif;
+    --mono: 'IBM Plex Mono','SFMono-Regular',Consolas,monospace;
+  }
+  [data-theme="dark"]{
+    --glass-bg: rgba(255,255,255,0.07);
+    --glass-bg-strong: rgba(255,255,255,0.12);
+    --glass-border: rgba(255,255,255,0.12);
+    --glass-border-top: rgba(255,255,255,0.22);
+    --glass-shadow: 0 8px 28px rgba(0,0,0,0.5);
+    --ink: #f5f5f7;
+    --ink-dim: rgba(245,245,247,0.6);
+    --accent: #3D8FE0;
+    --accent-dim: #6FADE8;
+    --accent-text: #ffffff;
+    --green: #4ADE80;
+    --red: #FF525C;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    min-height:100vh;
+    font-family:var(--font-system);
+    color:var(--ink);
+    padding:32px 20px 70px;
+    transition:background 0.4s ease, color 0.3s ease;
+    background:#ffffff;
+  }
+  [data-theme="dark"] body{
+    background:#000000;
+  }
+  .wrap{max-width:1000px;margin:0 auto;}
+
+  /* ---------- Masthead ---------- */
+  .masthead{
+    display:flex;justify-content:space-between;align-items:center;
+    margin-bottom:24px;gap:16px;flex-wrap:wrap;
+    padding-bottom:16px;
+    border-bottom:3px solid transparent;
+    border-image:linear-gradient(90deg, var(--accent) 0%, var(--accent) 55%, var(--red) 100%) 1;
+  }
+  .masthead-title{display:flex;align-items:center;gap:12px;}
+  .brand-mark{
+    width:38px;height:38px;border-radius:11px;
+    background:linear-gradient(135deg, var(--accent) 40%, var(--red) 140%);
+    display:flex;align-items:center;justify-content:center;
+    font-family:Georgia,serif;font-size:19px;color:var(--accent-text);font-weight:700;
+    box-shadow:0 4px 14px rgba(0,0,0,0.22);
+    flex-shrink:0;
+  }
+  .masthead h1{
+    font-size:19px;letter-spacing:-0.01em;font-weight:700;margin:0;color:var(--ink);
+  }
+  .masthead .sub{color:var(--ink-dim);font-size:12.5px;margin-top:2px;font-weight:500;}
+  .stamp{font-family:var(--mono);font-size:11px;color:var(--ink-dim);text-align:right;line-height:1.5;}
+  #asof{color:var(--accent);font-weight:600;}
+
+  /* ---------- Theme toggle ---------- */
+  .theme-toggle{
+    display:flex;align-items:center;gap:6px;
+    background:var(--glass-bg);
+    backdrop-filter:blur(16px) saturate(var(--glass-saturate));
+    -webkit-backdrop-filter:blur(16px) saturate(var(--glass-saturate));
+    border:1px solid var(--glass-border);
+    border-top-color:var(--glass-border-top);
+    border-radius:999px;
+    padding:4px;
+    box-shadow:var(--glass-shadow);
+  }
+  .theme-toggle button{
+    all:unset;display:flex;align-items:center;justify-content:center;
+
+    width:32px;height:32px;border-radius:999px;cursor:pointer;color:var(--ink-dim);
+    transition:transform 0.35s var(--spring), background 0.25s ease, color 0.25s ease;
+  }
+  .theme-toggle button svg{width:16px;height:16px;}
+  .theme-toggle button.active{
+    background:var(--accent);
+    color:var(--accent-text);
+    box-shadow:0 3px 10px rgba(0,0,0,0.25);
+  }
+  .theme-toggle button:hover{transform:scale(1.08);}
+  .theme-toggle button:active{transform:scale(0.94);}
+
+  /* ---------- Country tabs ---------- */
+  /* Sits directly on top of the "Paste Holdings Data" panel, like a real tab
+     strip (flat, underline-indicated active tab) rather than a floating pill
+     toggle — visually says "these two are different workspaces" more clearly
+     than a toggle switch would. */
+  .country-tabs{
+    display:flex;gap:2px;padding:0 10px;
+  }
+  .country-tab{
+    all:unset;cursor:pointer;
+    padding:10px 18px 11px;
+    font-family:var(--font-system);font-size:13px;font-weight:600;
+    color:var(--ink-dim);
+    border-radius:12px 12px 0 0;
+    border-bottom:3px solid transparent;
+    transition:color 0.2s ease, background 0.2s ease, border-color 0.2s ease;
+  }
+  .country-tab:hover{ color:var(--ink); background:rgba(0,0,0,0.03); }
+  [data-theme="dark"] .country-tab:hover{ background:rgba(255,255,255,0.05); }
+  .country-tab.active{
+    color:var(--accent);
+    background:var(--glass-bg-strong);
+    border-bottom-color:var(--accent);
+  }
+
+  /* ---------- Glass panel ---------- */
+  .panel{
+    background:var(--glass-bg);
+    backdrop-filter:blur(var(--glass-blur)) saturate(var(--glass-saturate));
+    -webkit-backdrop-filter:blur(var(--glass-blur)) saturate(var(--glass-saturate));
+    border:1px solid var(--glass-border);
+    border-top-color:var(--glass-border-top);
+    border-radius:var(--radius-lg);
+    box-shadow:
+      inset 0 1px 1px rgba(255,255,255,0.5),
+      inset 0 -1px 1px rgba(255,255,255,0.06),
+      var(--glass-shadow);
+    margin-bottom:22px;
+    transition:background 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease;
+  }
+  [data-theme="dark"] .panel{
+    box-shadow:
+      inset 0 1px 1px rgba(255,255,255,0.08),
+      inset 0 -1px 1px rgba(0,0,0,0.25),
+      var(--glass-shadow);
+  }
+  .panel-head{
+    position:sticky;
+    top:0;
+    z-index:5;
+    padding:14px 20px;
+    border-bottom:2px solid transparent;
+    border-image:linear-gradient(90deg, var(--accent) 0%, var(--accent) 60%, var(--red) 100%) 1;
+    display:flex;justify-content:space-between;align-items:center;
+    background:rgba(255,255,255,0.75);
+    backdrop-filter:blur(14px) saturate(160%);
+    -webkit-backdrop-filter:blur(14px) saturate(160%);
+    /* .panel itself no longer clips overflow (that would break this element's
+       stickiness — see SKILL.md), so this element clips its own background
+       to the panel's top corners instead. overflow:hidden here is safe: it's
+       on the sticky element itself, not an ancestor, so it has no effect on
+       whether *this* element can stick. */
+    border-radius:var(--radius-lg) var(--radius-lg) 0 0;
+    overflow:hidden;
+  }
+  [data-theme="dark"] .panel-head{ background:rgba(20,18,26,0.8); }
+  .panel-head h2{
+    font-size:13px;text-transform:uppercase;letter-spacing:0.06em;
+    margin:0;color:var(--ink);font-weight:700;
+  }
+  .tag{
+    font-family:var(--mono);font-size:10px;font-weight:700;
+    color:var(--accent-text);background:var(--accent);
+    padding:3px 9px;border-radius:999px;letter-spacing:0.02em;
+  }
+  .tag-red{ background:var(--red) !important; }
+  .panel-body{padding:20px;}
+
+  /* ---------- Inputs & buttons ---------- */
+  textarea{
+    width:100%;min-height:110px;
+    background:rgba(255,255,255,0.35);
+    color:var(--ink);
+    border:1px solid var(--glass-border);
+    border-radius:var(--radius-sm);padding:12px;
+    font-family:var(--mono);font-size:12px;resize:vertical;
+    transition:background 0.3s ease, border-color 0.3s ease;
+  }
+  [data-theme="dark"] textarea{ background:rgba(0,0,0,0.22); }
+  textarea::placeholder{color:var(--ink-dim);}
+  textarea:focus{outline:none;border-color:var(--accent-dim);}
+
+  .btn-row{display:flex;gap:10px;margin-top:12px;align-items:center;flex-wrap:wrap;}
+  button.primary{
+    position:relative;overflow:hidden;
+    background:linear-gradient(135deg, var(--accent) 45%, var(--red) 130%);
+    color:var(--accent-text);border:none;border-radius:999px;
+    padding:10px 20px;font-weight:600;font-size:13px;cursor:pointer;
+    font-family:var(--font-system);
+    box-shadow:0 6px 18px rgba(0,0,0,0.18);
+    transition:transform 0.35s var(--spring), box-shadow 0.35s ease-out, opacity 0.25s ease;
+    display:inline-flex;align-items:center;gap:8px;
+  }
+  button.primary:hover{ transform:scale(1.035) translateY(-1px); box-shadow:0 10px 26px rgba(0,0,0,0.26); }
+  button.primary:active{ transform:scale(0.98); }
+  button.primary:disabled{ cursor:default; opacity:0.85; transform:none; }
+  button.ghost{
+    background:var(--glass-bg);
+    backdrop-filter:blur(16px) saturate(var(--glass-saturate));
+    -webkit-backdrop-filter:blur(16px) saturate(var(--glass-saturate));
+    color:var(--accent);border:1.5px solid var(--accent);
+    border-radius:999px;padding:10px 18px;font-weight:600;font-size:13px;cursor:pointer;
+    font-family:var(--font-system);
+    transition:transform 0.35s var(--spring), color 0.25s ease, border-color 0.25s ease, background 0.25s ease;
+  }
+  button.ghost:hover{ color:var(--accent-text); background:var(--accent); border-color:var(--accent); transform:scale(1.03); }
+  button.ghost:active{ transform:scale(0.97); }
+  .hint{color:var(--ink-dim);font-size:11.5px;margin-top:9px;line-height:1.5;}
+
+  /* Spinner used inside the primary button while "building" */
+  .btn-spinner{
+    width:14px;height:14px;border-radius:50%;
+    border:2px solid color-mix(in srgb, var(--accent-text) 35%, transparent);
+    border-top-color:var(--accent-text);
+    animation:spin 0.7s linear infinite;
+    display:none;
+  }
+  button.primary.loading .btn-spinner{ display:inline-block; }
+  button.primary.loading .btn-label::after{ content:"Building..."; }
+  button.primary.loading .btn-label{ font-size:0; }
+  button.primary.loading .btn-label::after{ font-size:13px; }
+  @keyframes spin{ to{ transform:rotate(360deg); } }
+
+  /* ---------- Tables ---------- */
+  table{width:100%;border-collapse:collapse;font-size:13px;}
+  th{
+    text-align:right;font-family:var(--mono);font-size:10.5px;
+    text-transform:uppercase;letter-spacing:0.05em;color:var(--ink-dim);
+    padding:9px 10px;border-bottom:1px solid var(--glass-border);font-weight:600;
+  }
+  th:first-child, td:first-child{text-align:left;}
+  td{
+    text-align:right;padding:10px;font-family:var(--mono);
+    border-bottom:1px solid rgba(120,110,90,0.12);font-size:12.5px;
+    transition:background 0.2s ease;
+  }
+  [data-theme="dark"] td{ border-bottom-color:rgba(255,255,255,0.06); }
+  tr:last-child td{border-bottom:none;}
+  tbody tr:hover td{background:rgba(0,0,0,0.03);}
+  [data-theme="dark"] tbody tr:hover td{background:rgba(255,255,255,0.05);}
+  td.sym{font-family:var(--font-system);font-weight:700;letter-spacing:0.01em;color:var(--accent);}
+  .up{color:var(--green);font-weight:600;}
+  .down{color:var(--red);font-weight:700;}
+  tfoot td{
+    border-top:2px solid var(--accent);font-weight:700;
+    color:var(--accent);background:var(--glass-bg-strong);
+  }
+
+  input.qty-add{
+    width:70px;
+    background:rgba(255,255,255,0.35);
+    border:1.5px solid color-mix(in srgb, var(--red) 40%, var(--glass-border));color:var(--ink);
+    font-family:var(--mono);font-size:12.5px;padding:6px 7px;border-radius:10px;
+    text-align:right;transition:border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+  [data-theme="dark"] input.qty-add{ background:rgba(0,0,0,0.25); }
+  input.qty-add:focus{outline:none;border-color:var(--red);box-shadow:0 0 0 3px color-mix(in srgb, var(--red) 18%, transparent);}
+  .empty{color:var(--ink-dim);font-size:12.5px;padding:22px;text-align:center;font-family:var(--font-system);}
+  .foot-note{color:var(--ink-dim);font-size:11px;text-align:center;margin-top:18px;}
+
+  /* ---------- Loading skeleton ---------- */
+  .skeleton-row td{ padding:12px 10px; }
+  .skeleton-bar{
+    height:12px;border-radius:6px;
+    background:linear-gradient(90deg, rgba(120,110,90,0.12) 25%, rgba(120,110,90,0.24) 50%, rgba(120,110,90,0.12) 75%);
+    background-size:200% 100%;
+    animation:shimmer 1.3s infinite;
+  }
+  [data-theme="dark"] .skeleton-bar{
+    background:linear-gradient(90deg, rgba(255,255,255,0.06) 25%, rgba(255,255,255,0.14) 50%, rgba(255,255,255,0.06) 75%);
+    background-size:200% 100%;
+  }
+  @keyframes shimmer{ to{ background-position:-200% 0; } }
+
+  /* Fade-in for freshly rendered content */
+  .fade-in{ animation:fadeIn 0.45s ease both; }
+  @keyframes fadeIn{
+    from{ opacity:0; transform:translateY(4px); }
+    to{ opacity:1; transform:translateY(0); }
+  }
+
+  h3.subhead{
+    margin:0;font-size:12px;text-transform:uppercase;letter-spacing:0.06em;
+    color:var(--ink-dim);font-weight:700;
+  }
+
+  /* ---------- Sector pie chart ---------- */
+  .pie-wrap{
+    display:flex;align-items:flex-start;gap:32px;flex-wrap:wrap;justify-content:center;
+  }
+  .pie-svg-holder{
+    display:flex;flex-direction:column;align-items:center;flex-shrink:0;width:220px;
+  }
+  .pie-svg{ display:block; }
+  .pie-total-below{
+    text-align:center;margin-top:14px;
+  }
+  .pie-center-label{
+    font-family:var(--mono);font-size:9px;text-transform:uppercase;
+    letter-spacing:0.05em;color:var(--ink-dim);margin-bottom:3px;
+  }
+  .pie-center-value{
+    font-family:var(--font-system);font-size:16px;font-weight:700;color:var(--ink);
+    line-height:1.25;
+  }
+  .pie-slice{
+    transition:transform 0.3s var(--spring), filter 0.25s ease;
+    cursor:pointer;
+  }
+  .pie-slice.pop{ transform:translate(var(--tx), var(--ty)); filter:brightness(1.08); }
+  .pie-legend{ display:flex;flex-direction:column;gap:9px;min-width:420px;flex:1; }
+  .pie-legend-row{
+    display:flex;align-items:center;gap:14px;font-size:12.5px;
+    padding:6px 8px;border-bottom:1px solid rgba(120,110,90,0.1);
+    border-radius:8px;cursor:pointer;
+    transition:background 0.2s ease, transform 0.2s var(--spring);
+  }
+  .pie-legend-row.pop{ background:rgba(0,0,0,0.045); transform:translateX(3px); }
+  [data-theme="dark"] .pie-legend-row.pop{ background:rgba(255,255,255,0.08); }
+  [data-theme="dark"] .pie-legend-row{ border-bottom-color:rgba(255,255,255,0.06); }
+  .pie-legend-row:last-child{ border-bottom:none; }
+  .pie-swatch{ width:11px;height:11px;border-radius:3px;flex-shrink:0; }
+  .pie-legend-name{
+    font-family:var(--font-system);font-weight:600;color:var(--ink);
+    flex:0 0 160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  }
+  .pie-legend-bar-track{
+    flex:1 1 auto;min-width:60px;height:7px;border-radius:4px;
+    background:rgba(120,110,90,0.18);overflow:hidden;display:inline-block;
+  }
+  [data-theme="dark"] .pie-legend-bar-track{ background:rgba(255,255,255,0.1); }
+  .pie-legend-bar-fill{
+    display:block;height:100%;border-radius:4px;transition:width 0.6s var(--spring);
+  }
+  .pie-legend-val{ font-family:var(--mono);color:var(--ink-dim);font-size:11.5px;flex:0 0 100px;text-align:right; }
+  .pie-legend-pct{ font-family:var(--mono);font-weight:700;color:var(--ink);flex:0 0 62px;text-align:right; }
+
+  /* ---------- Stat cards ---------- */
+  /* Generic card-grid design, originally built for the bond Maturity Timeline
+     (one card per maturity date) and reused as-is for stock summary/highlight
+     cards (one card per metric, or one per notable holding) — same visual
+     language everywhere a quick-glance "headline number + context" card is
+     useful, rather than a bonds-only component. */
+  .card-grid{ display:flex;flex-wrap:wrap;gap:16px; }
+  .stat-card{
+    position:relative;
+    flex:1 1 220px;min-width:220px;
+    background:var(--glass-bg-strong);
+    border:1px solid var(--glass-border);
+    border-radius:26px;
+    padding:18px 18px 16px;
+    overflow:hidden;
+  }
+  /* The top accent stripe used to be a border-image, but border-image ignores
+     border-radius in every major browser — the card's rounded corners were
+     real, but that gradient line stayed hard-edged regardless, which is what
+     actually read as "no visible rounding" even after increasing the radius.
+     A pseudo-element clipped by the card's own overflow:hidden respects the
+     border-radius properly instead. */
+  .stat-card::before{
+    content:"";
+    position:absolute;top:0;left:0;right:0;height:3px;
+    background:linear-gradient(90deg, var(--accent), var(--red));
+  }
+  .stat-card-eyebrow{
+    font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:0.06em;
+    color:var(--ink-dim);font-weight:700;margin-bottom:8px;display:flex;align-items:center;gap:6px;
+  }
+  .stat-card-sub{ font-size:12px;color:var(--ink-dim);margin-bottom:10px;font-weight:500; }
+  .stat-card-label{
+    font-family:var(--font-system);font-size:10.5px;text-transform:uppercase;
+    letter-spacing:0.05em;color:var(--ink-dim);margin-bottom:2px;
+  }
+  .stat-card-value{
+    font-family:var(--mono);font-size:22px;font-weight:700;color:var(--ink);
+    margin-bottom:10px;line-height:1.2;
+  }
+  .stat-card-delta{
+    font-family:var(--mono);font-size:13px;font-weight:700;
+    display:flex;align-items:baseline;gap:6px;
+    padding-top:10px;border-top:1px solid var(--glass-border);
+  }
+  .stat-card-footnote{ font-family:var(--mono);font-size:11px;color:var(--ink-dim);font-weight:500; }
+</style>
+</head>
+
+<body>
+<div class="wrap">
+
+  <div class="masthead">
+    <div class="masthead-title">
+      <div class="brand-mark">₹</div>
+      <div>
+        <h1>Portfolio Ledger</h1>
+        <div class="sub">Paste your holdings snapshot below to build the tables</div>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:14px;">
+      <div class="stamp">Last parsed<br><span id="asof">&mdash;</span></div>
+      <div class="theme-toggle" role="group" aria-label="Theme">
+        <button type="button" id="lightBtn" title="Light mode" aria-label="Light mode">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+        </button>
+        <button type="button" id="darkBtn" title="Dark mode" aria-label="Dark mode">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-head"><h2>Overall Portfolio</h2><span class="tag">combined, in ₹</span></div>
+    <div class="panel-body" style="overflow-x:auto;">
+      <table id="overviewTable">
+        <thead><tr><th>Market</th><th>Invested</th><th>Present Value</th><th>P&amp;L</th><th>P&amp;L %</th></tr></thead>
+        <tbody><tr><td colspan="5" class="empty">Build a portfolio in the India or US tab below — each one you build gets added here automatically.</td></tr></tbody>
+        <tfoot></tfoot>
+      </table>
+      <div class="hint" id="overviewHint"></div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="country-tabs" role="tablist" aria-label="Country">
+      <button type="button" class="country-tab" id="countryIN" data-country="IN" role="tab">🇮🇳 India (₹)</button>
+      <button type="button" class="country-tab" id="countryUS" data-country="US" role="tab">🇺🇸 US ($)</button>
+      <button type="button" class="country-tab" id="countryBONDS" data-country="BONDS" role="tab">📜 Bonds</button>
+    </div>
+    <div class="panel-head"><h2>Paste Holdings Data</h2><span class="tag">input</span></div>
+    <div class="panel-body">
+      <textarea id="rawInput" placeholder="Paste your holdings snapshot here — either the ₹-concatenated text or the tab-separated table copied straight from your broker's holdings screen. Both formats are auto-detected."></textarea>
+      <div class="btn-row">
+        <button class="primary" id="parseBtn"><span class="btn-spinner"></span><span class="btn-label">Build tables</span></button>
+        <button class="ghost" id="sampleBtn">Load sample</button>
+        <button class="ghost" id="shareBtn">Copy link to view on phone</button>
+      </div>
+      <div class="hint" id="parseMsg"></div>
+      <div class="hint">Your last pasted data is saved on this device automatically, separately for each tab. Use "Copy link" to open the same tables on your phone or any other device — the data travels inside the link itself, nothing is uploaded anywhere.</div>
+    </div>
+  </div>
+
+  <div id="stockPanels">
+    <div class="panel">
+      <div class="panel-head"><h2>1 · Current Holdings</h2><span class="tag" id="holdCount"></span></div>
+      <div class="panel-body">
+        <div id="stockSummaryCards" class="card-grid" style="margin-bottom:20px;">
+          <div class="empty">Your portfolio summary appears here after parsing.</div>
+        </div>
+        <div style="overflow-x:auto;">
+          <table id="holdingsTable">
+            <thead><tr>
+              <th>Symbol</th><th>Qty</th><th>Buy Avg</th><th>Buy Value</th>
+              <th id="ltpHeader">LTP</th><th>Present Value</th><th>P&amp;L</th><th>P&amp;L %</th>
+            </tr></thead>
+            <tbody><tr><td colspan="8" class="empty">No data yet — paste your holdings above.</td></tr></tbody>
+            <tfoot></tfoot>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head"><h2 id="sectorHeading">2 · Sector Allocation</h2><span class="tag">by invested value</span></div>
+      <div class="panel-body" style="overflow-x:auto;">
+        <div class="pie-wrap" id="pieWrap">
+          <div class="empty">Sector breakdown appears here after parsing.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head"><h2>3 · Market Cap Allocation</h2><span class="tag">Large / Mid / Small</span></div>
+      <div class="panel-body" style="overflow-x:auto;">
+        <div class="pie-wrap" id="capWrap">
+          <div class="empty">Market cap breakdown appears here after parsing.</div>
+        </div>
+        <div class="hint" id="capHint">Tiers follow AMFI's latest classification (Large Cap ≥ ₹1,06,300 cr, Mid Cap ≥ ₹33,500 cr, else Small Cap), applied to each holding's approximate market cap. ITBEES (an index ETF, not a company) is grouped separately under "ETF / Fund" since it has no market cap of its own.</div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head"><h2>4 · Add Shares — Average Price Simulator</h2><span class="tag tag-red">what-if</span></div>
+      <div class="panel-body" style="overflow-x:auto;">
+        <table id="simTable">
+          <thead><tr>
+            <th>Symbol</th><th>Current Qty</th><th>Current Avg</th><th>LTP</th>
+            <th>Add Qty</th><th>New Qty</th><th>Avg Price Change</th><th>New Avg Price</th><th>New Buy Value</th>
+          </tr></thead>
+          <tbody><tr><td colspan="9" class="empty">Simulator appears here after parsing.</td></tr></tbody>
+        </table>
+        <div class="hint">Enter how many extra shares of a stock you'd buy today at its current LTP — the new average buy price updates live, starting from your recorded Buy Avg (not Buy Value ÷ Qty, which can drift from Buy Avg after a demerger, bonus issue, or split reallocates cost basis — Buy Avg is treated as the reliable per-share figure here).</div>
+
+        <div style="margin-top:22px;border-top:1px solid var(--glass-border);padding-top:18px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+            <h3 class="subhead">Updated Sector Allocation (after adds)</h3>
+            <span class="tag tag-red">by invested value</span>
+          </div>
+          <table id="simSectorTable">
+            <thead><tr><th>Sector</th><th>Current Invested</th><th>Updated Invested</th><th>New Weightage</th></tr></thead>
+            <tbody><tr><td colspan="4" class="empty">Add share quantities above to see the updated mix.</td></tr></tbody>
+          </table>
+          <div class="hint">Recalculates live as you change the Add Qty column above — shows how your sector mix shifts if you go through with those buys.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="foot-note">Sector tags are best-effort guesses for NSE/BSE symbols. Toggle light/dark above — your choice is remembered on this device.</div>
+  </div>
+
+  <div id="bondPanels" style="display:none;">
+    <div class="panel">
+      <div class="panel-head"><h2>1 · Maturity Timeline</h2><span class="tag tag-red">held to maturity</span></div>
+      <div class="panel-body">
+        <div id="maturityTimeline" class="card-grid">
+          <div class="empty">Your maturity timeline appears here after parsing.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head"><h2>2 · Maturity Projection (detail)</h2><span class="tag tag-red">held to maturity</span></div>
+      <div class="panel-body" style="overflow-x:auto;">
+        <table id="bondProjectionTable">
+          <thead><tr>
+            <th>Maturity Date</th><th>Bond(s)</th><th>Invested</th>
+            <th>Expected Maturity Value</th><th>Gain (₹)</th><th>Gain (%)</th>
+          </tr></thead>
+          <tbody><tr><td colspan="6" class="empty">Maturity projection appears here after parsing.</td></tr></tbody>
+          <tfoot></tfoot>
+        </table>
+        <div class="hint">Rows are grouped by maturity date (soonest first) — lots that pay out on the same date are combined, since that's when you'll actually receive the money, even if they were bought separately at different prices. Projection method: since these bonds are held to maturity (not marked-to-market or sold early), the expected maturity value for each lot is estimated as <b>Invested Amount × (1 + Expected Return % × Tenure in years)</b> — a simple, non-compounded annualized return over the full holding period, then summed across the lots sharing that maturity date. This is an estimate based on the stated "Expected Returns" figure, not a guaranteed payout — the bond's actual terms (coupon schedule, call/put options, issuer default risk) determine the real amount received at maturity.</div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head"><h2>3 · Bond Holdings</h2><span class="tag" id="bondCount"></span></div>
+      <div class="panel-body" style="overflow-x:auto;">
+        <table id="bondsTable">
+          <thead><tr>
+            <th>Purchase Date</th><th>Bond Name</th><th>Rating</th><th>Face Value</th>
+            <th>Purchased Price</th><th>Units</th><th>Invested</th><th>Expected Return</th>
+            <th>Tenure</th><th>Maturity Date</th>
+          </tr></thead>
+          <tbody><tr><td colspan="10" class="empty">No data yet — paste your bond purchases above.</td></tr></tbody>
+          <tfoot></tfoot>
+        </table>
+      </div>
+    </div>
+
+    <div class="foot-note">Bond figures are based on your pasted purchase data and the platform's stated expected return — not a live or guaranteed valuation.</div>
+  </div>
+</div>
+
+<script>
+// ---------- Theme handling ----------
+function applyTheme(theme){
+  document.documentElement.setAttribute('data-theme', theme);
+  document.getElementById('lightBtn').classList.toggle('active', theme === 'light');
+  document.getElementById('darkBtn').classList.toggle('active', theme === 'dark');
+  try{ localStorage.setItem('ledger-theme', theme); }catch(e){}
+}
+(function initTheme(){
+  let saved = null;
+  try{ saved = localStorage.getItem('ledger-theme'); }catch(e){}
+  if(!saved){
+    saved = (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light';
+  }
+  applyTheme(saved);
+})();
+document.getElementById('lightBtn').addEventListener('click', ()=>applyTheme('light'));
+document.getElementById('darkBtn').addEventListener('click', ()=>applyTheme('dark'));
+
+// ---------- Sector reference map (editable) ----------
+// Extend this as new symbols show up. Fallback = "Uncategorized".
+// Symbol → sector lookup covering all 500 current Nifty 500 constituents
+// (sourced from NSE's own official industry classification, not guessed),
+// plus ~31 additional symbols outside the Nifty 500 that still matter for
+// this tool specifically — including several of the user's own actual
+// holdings (SOUTHBANK, ITCHOTELS, TMCV, TMPV, ITBEES) that fall below the
+// Nifty 500's market-cap cutoff. 531 symbols total. NSE's own industry
+// categories were mapped onto this tool's existing (more granular) sector
+// names — e.g. NSE's single "Financial Services" bucket was split into
+// Banking / Insurance / NBFC / NBFC (Gold Loan) by company type, and
+// "Automobile and Auto Components" was split into Automobile (finished
+// vehicle OEMs) / Auto Components (parts suppliers) — rather than adopting
+// NSE's broader categories wholesale, to keep the existing sector names and
+// their hand-picked colors meaningful. Even with 531 symbols mapped, a
+// genuinely new/uncommon symbol can still show up — add it here (and to
+// MARKET_CAP_CR if it's an individual company, not an ETF) rather than
+// leaving it uncategorized.
+const SECTOR_MAP = {
+  // Banking (32)
+  "AUBANK": "Banking", "AXISBANK": "Banking", "BANDHANBNK": "Banking", "BANKBARODA": "Banking",
+  "BANKINDIA": "Banking", "CANBK": "Banking", "CENTRALBK": "Banking", "CSBBANK": "Banking",
+  "CUB": "Banking", "DCBBANK": "Banking", "EQUITASBNK": "Banking", "FEDERALBNK": "Banking",
+  "HDFCBANK": "Banking", "ICICIBANK": "Banking", "IDBI": "Banking", "IDFCFIRSTB": "Banking",
+  "INDIANB": "Banking", "INDUSINDBK": "Banking", "IOB": "Banking", "J&KBANK": "Banking",
+  "KARURVYSYA": "Banking", "KOTAKBANK": "Banking", "MAHABANK": "Banking", "PNB": "Banking",
+  "RBLBANK": "Banking", "SBIN": "Banking", "SOUTHBANK": "Banking", "TMB": "Banking",
+  "UCOBANK": "Banking", "UJJIVANSFB": "Banking", "UNIONBANK": "Banking", "YESBANK": "Banking",
+  // Automobile (14)
+  "ASHOKLEY": "Automobile", "ATULAUTO": "Automobile", "BAJAJ-AUTO": "Automobile", "EICHERMOT": "Automobile",
+  "FORCEMOT": "Automobile", "HEROMOTOCO": "Automobile", "JBMA": "Automobile", "M&M": "Automobile",
+  "MARUTI": "Automobile", "SMLISUZU": "Automobile", "TATAMOTORS": "Automobile", "TMCV": "Automobile",
+  "TMPV": "Automobile", "TVSMOTOR": "Automobile",
+  // Auto Components (27)
+  "APOLLOTYRE": "Auto Components", "ARE&M": "Auto Components", "ASAHIINDIA": "Auto Components", "BALKRISIND": "Auto Components",
+  "BHARATFORG": "Auto Components", "BOSCHLTD": "Auto Components", "CEATLTD": "Auto Components", "CIEINDIA": "Auto Components",
+  "CRAFTSMAN": "Auto Components", "ENDURANCE": "Auto Components", "EXIDEIND": "Auto Components", "GABRIEL": "Auto Components",
+  "HBLENGINE": "Auto Components", "MINDACORP": "Auto Components", "MOTHERSON": "Auto Components", "MRF": "Auto Components",
+  "MSUMI": "Auto Components", "OLECTRA": "Auto Components", "RKFORGE": "Auto Components", "SCHAEFFLER": "Auto Components",
+  "SONACOMS": "Auto Components", "SUNDRMFAST": "Auto Components", "SUPRAJIT": "Auto Components", "TIINDIA": "Auto Components",
+  "UNOMINDA": "Auto Components", "VARROC": "Auto Components", "ZFCVINDIA": "Auto Components",
+  // IT Services (27)
+  "AFFLE": "IT Services", "BSOFT": "IT Services", "COFORGE": "IT Services", "CYIENT": "IT Services",
+  "HAPPSTMNDS": "IT Services", "HCLTECH": "IT Services", "INFY": "IT Services", "INTELLECT": "IT Services",
+  "ITBEES": "IT Services", "KPITTECH": "IT Services", "LATENTVIEW": "IT Services", "LTIM": "IT Services",
+  "LTTS": "IT Services", "MAPMYINDIA": "IT Services", "MASTEK": "IT Services", "MPHASIS": "IT Services",
+  "NEWGEN": "IT Services", "OFSS": "IT Services", "PERSISTENT": "IT Services", "SONATSOFTW": "IT Services",
+  "TANLA": "IT Services", "TATAELXSI": "IT Services", "TATATECH": "IT Services", "TCS": "IT Services",
+  "TECHM": "IT Services", "WIPRO": "IT Services", "ZENSARTECH": "IT Services",
+  // Pharmaceuticals (47)
+  "ABBOTINDIA": "Pharmaceuticals", "AJANTPHARM": "Pharmaceuticals", "ALIVUS": "Pharmaceuticals", "ALKEM": "Pharmaceuticals",
+  "APLLTD": "Pharmaceuticals", "APOLLOHOSP": "Pharmaceuticals", "ASTERDM": "Pharmaceuticals", "ASTRAZEN": "Pharmaceuticals",
+  "AUROPHARMA": "Pharmaceuticals", "BIOCON": "Pharmaceuticals", "CAPLIPOINT": "Pharmaceuticals", "CIPLA": "Pharmaceuticals",
+  "CONCORDBIO": "Pharmaceuticals", "DIVISLAB": "Pharmaceuticals", "DRREDDY": "Pharmaceuticals", "ERIS": "Pharmaceuticals",
+  "FDC": "Pharmaceuticals", "FORTIS": "Pharmaceuticals", "GLAND": "Pharmaceuticals", "GLAXO": "Pharmaceuticals",
+  "GLENMARK": "Pharmaceuticals", "GRANULES": "Pharmaceuticals", "IPCALAB": "Pharmaceuticals", "JBCHEPHARM": "Pharmaceuticals",
+  "JUBLPHARMA": "Pharmaceuticals", "KIMS": "Pharmaceuticals", "LALPATHLAB": "Pharmaceuticals", "LAURUSLABS": "Pharmaceuticals",
+  "LUPIN": "Pharmaceuticals", "MANKIND": "Pharmaceuticals", "MAXHEALTH": "Pharmaceuticals", "MEDANTA": "Pharmaceuticals",
+  "METROPOLIS": "Pharmaceuticals", "NATCOPHARM": "Pharmaceuticals", "NH": "Pharmaceuticals", "PFIZER": "Pharmaceuticals",
+  "POLYMED": "Pharmaceuticals", "PPLPHARMA": "Pharmaceuticals", "RAINBOW": "Pharmaceuticals", "SANOFI": "Pharmaceuticals",
+  "SPARC": "Pharmaceuticals", "SUNPHARMA": "Pharmaceuticals", "SUVENPHAR": "Pharmaceuticals", "SYNGENE": "Pharmaceuticals",
+  "TORNTPHARM": "Pharmaceuticals", "VIJAYA": "Pharmaceuticals", "ZYDUSLIFE": "Pharmaceuticals",
+  // FMCG (31)
+  "AVANTIFEED": "FMCG", "AWL": "FMCG", "BALRAMCHIN": "FMCG", "BBTC": "FMCG",
+  "BIKAJI": "FMCG", "BRITANNIA": "FMCG", "CCL": "FMCG", "COLPAL": "FMCG",
+  "DABUR": "FMCG", "DOMS": "FMCG", "EMAMILTD": "FMCG", "GAEL": "FMCG",
+  "GILLETTE": "FMCG", "GODFRYPHLP": "FMCG", "GODREJCP": "FMCG", "HINDUNILVR": "FMCG",
+  "HONASA": "FMCG", "ITC": "FMCG", "JYOTHYLAB": "FMCG", "KRBL": "FMCG",
+  "MARICO": "FMCG", "NESTLEIND": "FMCG", "PATANJALI": "FMCG", "PGHH": "FMCG",
+  "RADICO": "FMCG", "RENUKA": "FMCG", "TATACONSUM": "FMCG", "TRIVENI": "FMCG",
+  "UBL": "FMCG", "UNITDSPR": "FMCG", "VBL": "FMCG",
+  // NBFC (Gold Loan) (2)
+  "MANAPPURAM": "NBFC (Gold Loan)", "MUTHOOTFIN": "NBFC (Gold Loan)",
+  // Hotels & Hospitality (7)
+  "CHALET": "Hotels & Hospitality", "EASEMYTRIP": "Hotels & Hospitality", "INDHOTEL": "Hotels & Hospitality", "IRCTC": "Hotels & Hospitality",
+  "ITCHOTELS": "Hotels & Hospitality", "LEMONTREE": "Hotels & Hospitality", "MHRIL": "Hotels & Hospitality",
+  // Retail (22)
+  "ABFRL": "Retail", "BLS": "Retail", "DEVYANI": "Retail", "DMART": "Retail",
+  "EIHOTEL": "Retail", "ETERNAL": "Retail", "INDIAMART": "Retail", "JUBLFOOD": "Retail",
+  "JUSTDIAL": "Retail", "MANYAVAR": "Retail", "MEDPLUS": "Retail", "NAUKRI": "Retail",
+  "NYKAA": "Retail", "RBA": "Retail", "RTNINDIA": "Retail", "SAPPHIRE": "Retail",
+  "SHOPERSSTOP": "Retail", "TBOTEK": "Retail", "TRENT": "Retail", "VMART": "Retail",
+  "WESTLIFE": "Retail", "ZOMATO": "Retail",
+  // Aviation (2)
+  "INDIGO": "Aviation", "SPICEJET": "Aviation",
+  // Capital Goods (61)
+  "ABB": "Capital Goods", "ACE": "Capital Goods", "AIAENG": "Capital Goods", "APARINDS": "Capital Goods",
+  "APLAPOLLO": "Capital Goods", "ASTRAL": "Capital Goods", "BDL": "Capital Goods", "BEL": "Capital Goods",
+  "BEML": "Capital Goods", "BHEL": "Capital Goods", "BORORENEW": "Capital Goods", "CARBORUNIV": "Capital Goods",
+  "CGPOWER": "Capital Goods", "COCHINSHIP": "Capital Goods", "CUMMINSIND": "Capital Goods", "DATAPATTNS": "Capital Goods",
+  "ELECON": "Capital Goods", "ELGIEQUIP": "Capital Goods", "EPL": "Capital Goods", "ESCORTS": "Capital Goods",
+  "FINCABLES": "Capital Goods", "FINPIPE": "Capital Goods", "GMMPFAUDLR": "Capital Goods", "GPIL": "Capital Goods",
+  "GRAPHITE": "Capital Goods", "GRINDWELL": "Capital Goods", "GRSE": "Capital Goods", "HAL": "Capital Goods",
+  "HAPPYFORGE": "Capital Goods", "HEG": "Capital Goods", "HONAUT": "Capital Goods", "INOXWIND": "Capital Goods",
+  "JINDALSAW": "Capital Goods", "JWL": "Capital Goods", "KAYNES": "Capital Goods", "KEI": "Capital Goods",
+  "KIRLOSENG": "Capital Goods", "KSB": "Capital Goods", "MAHSEAMLES": "Capital Goods", "MAZDOCK": "Capital Goods",
+  "MTARTECH": "Capital Goods", "POLYCAB": "Capital Goods", "POWERINDIA": "Capital Goods", "PRAJIND": "Capital Goods",
+  "PRINCEPIPE": "Capital Goods", "RATNAMANI": "Capital Goods", "RHIM": "Capital Goods", "RRKABEL": "Capital Goods",
+  "SCHNEIDER": "Capital Goods", "SHYAMMETL": "Capital Goods", "SIEMENS": "Capital Goods", "SKFINDIA": "Capital Goods",
+  "SUPREMEIND": "Capital Goods", "SUZLON": "Capital Goods", "SYRMA": "Capital Goods", "THERMAX": "Capital Goods",
+  "TIMKEN": "Capital Goods", "TITAGARH": "Capital Goods", "TRITURBINE": "Capital Goods", "USHAMART": "Capital Goods",
+  "WELCORP": "Capital Goods",
+  // Cement (14)
+  "ACC": "Cement", "AMBUJACEM": "Cement", "BIRLACORPN": "Cement", "DALBHARAT": "Cement",
+  "GRASIM": "Cement", "HEIDELBERGCEM": "Cement", "INDIACEM": "Cement", "JKCEMENT": "Cement",
+  "JKLAKSHMI": "Cement", "NUVOCO": "Cement", "PRSMJOHNSN": "Cement", "RAMCOCEM": "Cement",
+  "SHREECEM": "Cement", "ULTRACEMCO": "Cement",
+  // Chemicals (36)
+  "AARTIIND": "Chemicals", "ACI": "Chemicals", "AETHER": "Chemicals", "ALKYLAMINE": "Chemicals",
+  "ANURAS": "Chemicals", "ATUL": "Chemicals", "BALAMINES": "Chemicals", "BAYERCROP": "Chemicals",
+  "CHAMBLFERT": "Chemicals", "CHEMPLASTS": "Chemicals", "CLEAN": "Chemicals", "COROMANDEL": "Chemicals",
+  "DEEPAKFERT": "Chemicals", "DEEPAKNTR": "Chemicals", "EIDPARRY": "Chemicals", "FACT": "Chemicals",
+  "FINEORG": "Chemicals", "FLUOROCHEM": "Chemicals", "GNFC": "Chemicals", "GSFC": "Chemicals",
+  "GUJALKALI": "Chemicals", "HSCL": "Chemicals", "JUBLINGREA": "Chemicals", "LINDEINDIA": "Chemicals",
+  "LXCHEM": "Chemicals", "NAVINFLUOR": "Chemicals", "PCBL": "Chemicals", "PIDILITIND": "Chemicals",
+  "PIIND": "Chemicals", "RCF": "Chemicals", "SOLARINDS": "Chemicals", "SRF": "Chemicals",
+  "SUMICHEM": "Chemicals", "TATACHEM": "Chemicals", "UPL": "Chemicals", "VINATIORGA": "Chemicals",
+  // Construction & Infra (15)
+  "ENGINERSIN": "Construction & Infra", "GMRINFRA": "Construction & Infra", "HGINFRA": "Construction & Infra", "IRB": "Construction & Infra",
+  "IRCON": "Construction & Infra", "KEC": "Construction & Infra", "KNRCON": "Construction & Infra", "KPIL": "Construction & Infra",
+  "LT": "Construction & Infra", "NBCC": "Construction & Infra", "NCC": "Construction & Infra", "PNCINFRA": "Construction & Infra",
+  "RITES": "Construction & Infra", "RVNL": "Construction & Infra", "SWSOLAR": "Construction & Infra",
+  // Consumer Durables (25)
+  "AMBER": "Consumer Durables", "ASIANPAINT": "Consumer Durables", "BATAINDIA": "Consumer Durables", "BERGEPAINT": "Consumer Durables",
+  "BLUESTARCO": "Consumer Durables", "CAMPUS": "Consumer Durables", "CELLO": "Consumer Durables", "CENTURYPLY": "Consumer Durables",
+  "CERA": "Consumer Durables", "CROMPTON": "Consumer Durables", "DIXON": "Consumer Durables", "HAVELLS": "Consumer Durables",
+  "INDIGOPNTS": "Consumer Durables", "KAJARIACER": "Consumer Durables", "KALYANKJIL": "Consumer Durables", "KANSAINER": "Consumer Durables",
+  "METROBRAND": "Consumer Durables", "RAJESHEXPO": "Consumer Durables", "SAFARI": "Consumer Durables", "TITAN": "Consumer Durables",
+  "VAIBHAVGBL": "Consumer Durables", "VGUARD": "Consumer Durables", "VIPIND": "Consumer Durables", "VOLTAS": "Consumer Durables",
+  "WHIRLPOOL": "Consumer Durables",
+  // Diversified (4)
+  "3MINDIA": "Diversified", "DCMSHRIRAM": "Diversified", "GODREJIND": "Diversified", "SWANENERGY": "Diversified",
+  // Insurance (9)
+  "GICRE": "Insurance", "HDFCLIFE": "Insurance", "ICICIGI": "Insurance", "ICICIPRULI": "Insurance",
+  "LICI": "Insurance", "NAM-INDIA": "Insurance", "NIACL": "Insurance", "SBILIFE": "Insurance",
+  "STARHEALTH": "Insurance",
+  // Logistics & Services (15)
+  "ADANIPORTS": "Logistics & Services", "ALLCARGO": "Logistics & Services", "BLUEDART": "Logistics & Services", "CONCOR": "Logistics & Services",
+  "DELHIVERY": "Logistics & Services", "ECLERX": "Logistics & Services", "FSL": "Logistics & Services", "GESHIP": "Logistics & Services",
+  "GMRINFRASTRUCT": "Logistics & Services", "GPPL": "Logistics & Services", "JSWINFRA": "Logistics & Services", "MMTC": "Logistics & Services",
+  "QUESS": "Logistics & Services", "REDINGTON": "Logistics & Services", "TVSSCS": "Logistics & Services",
+  // Media & Entertainment (6)
+  "NETWORK18": "Media & Entertainment", "PVRINOX": "Media & Entertainment", "SAREGAMA": "Media & Entertainment", "SUNTV": "Media & Entertainment",
+  "TIPSMUSIC": "Media & Entertainment", "ZEEL": "Media & Entertainment",
+  // Metals & Mining (17)
+  "ADANIENT": "Metals & Mining", "GMDCLTD": "Metals & Mining", "HINDALCO": "Metals & Mining", "HINDCOPPER": "Metals & Mining",
+  "HINDZINC": "Metals & Mining", "JAIBALAJI": "Metals & Mining", "JINDALSTEL": "Metals & Mining", "JSL": "Metals & Mining",
+  "JSWSTEEL": "Metals & Mining", "LLOYDSME": "Metals & Mining", "MOIL": "Metals & Mining", "NATIONALUM": "Metals & Mining",
+  "NMDC": "Metals & Mining", "NSLNISP": "Metals & Mining", "SAIL": "Metals & Mining", "TATASTEEL": "Metals & Mining",
+  "VEDL": "Metals & Mining",
+  // NBFC (52)
+  "360ONE": "NBFC", "AAVAS": "NBFC", "ABCAPITAL": "NBFC", "ANANDRATHI": "NBFC",
+  "ANGELONE": "NBFC", "APTUS": "NBFC", "BAJAJFINSV": "NBFC", "BAJAJHLDNG": "NBFC",
+  "BAJFINANCE": "NBFC", "BSE": "NBFC", "CAMS": "NBFC", "CANFINHOME": "NBFC",
+  "CDSL": "NBFC", "CGCL": "NBFC", "CHOLAFIN": "NBFC", "CHOLAHLDNG": "NBFC",
+  "CREDITACC": "NBFC", "CRISIL": "NBFC", "FIVESTAR": "NBFC", "HDFCAMC": "NBFC",
+  "HOMEFIRST": "NBFC", "HUDCO": "NBFC", "IEX": "NBFC", "IFCI": "NBFC",
+  "IIFL": "NBFC", "IRFC": "NBFC", "ISEC": "NBFC", "JIOFIN": "NBFC",
+  "JMFINANCIL": "NBFC", "KFINTECH": "NBFC", "LICHSGFIN": "NBFC", "LTF": "NBFC",
+  "M&MFIN": "NBFC", "MCX": "NBFC", "MFSL": "NBFC", "MOTILALOFS": "NBFC",
+  "NUVAMA": "NBFC", "PAYTM": "NBFC", "PEL": "NBFC", "PFC": "NBFC",
+  "PNBHOUSING": "NBFC", "POLICYBZR": "NBFC", "POONAWALLA": "NBFC", "RECLTD": "NBFC",
+  "SAMMAANCAP": "NBFC", "SBFC": "NBFC", "SBICARD": "NBFC", "SHRIRAMFIN": "NBFC",
+  "SUNDARAMFIN": "NBFC", "SUNDARMFIN": "NBFC", "TATAINVEST": "NBFC", "UTIAMC": "NBFC",
+  // Oil & Gas (19)
+  "AEGISLOG": "Oil & Gas", "ATGL": "Oil & Gas", "BPCL": "Oil & Gas", "CASTROLIND": "Oil & Gas",
+  "CHENNPETRO": "Oil & Gas", "COALINDIA": "Oil & Gas", "GAIL": "Oil & Gas", "GSPL": "Oil & Gas",
+  "GUJGASLTD": "Oil & Gas", "HINDPETRO": "Oil & Gas", "HPCL": "Oil & Gas", "IGL": "Oil & Gas",
+  "IOC": "Oil & Gas", "MGL": "Oil & Gas", "MRPL": "Oil & Gas", "OIL": "Oil & Gas",
+  "ONGC": "Oil & Gas", "PETRONET": "Oil & Gas", "RELIANCE": "Oil & Gas",
+  // Paints (1)
+  "AKZOINDIA": "Paints",
+  // Paper & Forest Products (2)
+  "ABREL": "Paper & Forest Products", "JKPAPER": "Paper & Forest Products",
+  // Power & Utilities (12)
+  "ADANIENSOL": "Power & Utilities", "ADANIGREEN": "Power & Utilities", "ADANIPOWER": "Power & Utilities", "CESC": "Power & Utilities",
+  "JSWENERGY": "Power & Utilities", "NHPC": "Power & Utilities", "NLCINDIA": "Power & Utilities", "NTPC": "Power & Utilities",
+  "POWERGRID": "Power & Utilities", "SJVN": "Power & Utilities", "TATAPOWER": "Power & Utilities", "TORNTPOWER": "Power & Utilities",
+  // Real Estate (11)
+  "BRIGADE": "Real Estate", "DLF": "Real Estate", "GODREJPROP": "Real Estate", "LODHA": "Real Estate",
+  "MAHLIFE": "Real Estate", "OBEROIRLTY": "Real Estate", "PHOENIXLTD": "Real Estate", "PRESTIGE": "Real Estate",
+  "SIGNATURE": "Real Estate", "SOBHA": "Real Estate", "SUNTECK": "Real Estate",
+  // Telecom (11)
+  "BHARTIARTL": "Telecom", "HFCL": "Telecom", "IDEA": "Telecom", "INDUSTOWER": "Telecom",
+  "ITI": "Telecom", "RAILTEL": "Telecom", "ROUTE": "Telecom", "STLTECH": "Telecom",
+  "TATACOMM": "Telecom", "TEJASNET": "Telecom", "TTML": "Telecom",
+  // Textiles (10)
+  "ALOKINDS": "Textiles", "ARVIND": "Textiles", "KPRMILL": "Textiles", "PAGEIND": "Textiles",
+  "RAYMOND": "Textiles", "TRIDENT": "Textiles", "VARDHMAN": "Textiles", "VTL": "Textiles",
+  "WELSPUNIND": "Textiles", "WELSPUNLIV": "Textiles"
+};
+const SECTOR_OPTIONS = [...new Set(Object.values(SECTOR_MAP))].concat(["Uncategorized"]).sort();
+const sectorOverrides = {}; // symbol -> sector, user corrections this session
+
+// Fixed per-sector colors — chosen to be intuitive (finance=blue, motors=red,
+// health=violet, gold-lending=mustard, etc.) and mutually distinct, not derived
+// from rank or sort order, so a sector is always the same color everywhere on
+// the page regardless of how the portfolio shuffles. Sectors not listed here
+// (there are more of those now than there are explicit colors) still get a
+// stable color automatically via the FALLBACK_PALETTE hash in colorForSector()
+// — you don't need to add every new sector here, only ones worth a hand-picked
+// color.
+const SECTOR_COLORS = {
+  "Banking": "#0066B1",            // BMW blue — finance/trust
+  "Automobile": "#E7222E",         // BMW red — motors
+  "Auto Components": "#F2994A",    // warm orange — adjacent to Automobile, still distinct
+  "IT Services": "#009688",        // teal — tech convention
+  "Pharmaceuticals": "#7C4DFF",    // violet — health, kept away from green/red (P&L colors)
+  "FMCG": "#F0B429",               // amber — consumer goods
+  "NBFC (Gold Loan)": "#B8860B",   // dark goldenrod — literally gold-backed lending
+  "Hotels & Hospitality": "#E0559E", // magenta/pink — hospitality, leisure
+  "Retail": "#5C6BC0",             // indigo — distinct from the pink/magenta hospitality uses
+  "Uncategorized": "#9E9E9E",      // neutral gray
+  // US "Category" column values reuse the same visual language where the
+  // concept overlaps (Tech ~ IT Services, Bank ~ Banking), so a US tab reads
+  // consistently with the India tab's color scheme.
+  "Tech": "#009688",
+  "Bank": "#0066B1"
+};
+// Any sector not in the map above still needs a stable color — hash the name
+// to a deterministic index into this fallback palette so it's consistent
+// across rebuilds without needing a code change for every future new sector.
+const FALLBACK_PALETTE = ["#3F51B5","#00838F","#8D6E63","#5D4037","#455A64","#AD1457","#6D4C41","#00695C"];
+function colorForSector(name){
+  if(SECTOR_COLORS[name]) return SECTOR_COLORS[name];
+  let hash = 0;
+  for(let i=0;i<name.length;i++){ hash = (hash*31 + name.charCodeAt(i)) >>> 0; }
+  return FALLBACK_PALETTE[hash % FALLBACK_PALETTE.length];
+}
+
+// ---------- Country / currency handling ----------
+// The whole page works for either an Indian (₹) or a US ($) holdings tab.
+// CURRENT_COUNTRY controls: which parser runs, the currency symbol + number
+// locale used everywhere via inr(), a few header/heading labels, which sample
+// data loads, and which market-cap tier thresholds apply. It's set explicitly
+// by the country tabs (not auto-detected) since the person knows which
+// portfolio they're pasting — auto-detection would guess wrong on ambiguous
+// data (e.g. a plain-number US export with no $ signs).
+let CURRENT_COUNTRY = 'IN';
+const COUNTRY_CURRENCY = { IN: '₹', US: '$' };
+const COUNTRY_LOCALE = { IN: 'en-IN', US: 'en-US' };
+
+const SAMPLE = `ARE&M
+  3
+5\t863.77\t4,318.85\t919.80\t4,599.00\t280.15\t+6.49%
+DRREDDY
+  2
+4\t1,215.59\t4,862.35\t1,187.30\t4,749.20\t-113.15\t-2.33%
+FEDERALBNK
+  2
+2\t193.82\t387.64\t350.75\t701.50\t313.86\t+80.97%
+HDFCBANK
+5\t823.81\t4,119.05\t725.80\t3,629.00\t-490.05\t-11.90%
+IDFCFIRSTB
+5\t69.63\t348.14\t85.80\t429.00\t80.86\t+23.23%
+INDUSINDBK
+  9
+12\t833.50\t10,002.00\t1,010.50\t12,126.00\t2,124.00\t+21.24%
+INFY
+9\t1,238.21\t11,143.90\t1,126.65\t10,139.85\t-1,004.05\t-9.01%
+ITBEES
+5\t31.23\t156.14\t33.84\t169.20\t13.06\t+8.36%
+ITC
+  15
+36\t346.87\t12,487.29\t268.60\t9,669.60\t-2,817.69\t-22.56%
+ITCHOTELS
+  1
+1\t589.43\t589.43\t166.55\t166.55\t-422.88\t-71.74%
+JYOTHYLAB
+  1
+8\t304.17\t2,433.35\t212.13\t1,697.04\t-736.31\t-30.26%
+MANAPPURAM
+  30
+30\t179.72\t5,391.57\t367.70\t11,031.00\t5,639.43\t+104.60%
+MUTHOOTFIN
+2\t2,914.20\t5,828.40\t3,200.00\t6,400.00\t571.60\t+9.81%
+NATCOPHARM
+  18
+28\t972.44\t27,228.35\t870.80\t24,382.40\t-2,845.95\t-10.45%
+SOUTHBANK
+  98
+137\t28.23\t3,867.03\t45.66\t6,255.42\t2,388.39\t+61.76%
+TCS
+  1
+6\t2,617.07\t15,702.40\t2,284.50\t13,707.00\t-1,995.40\t-12.71%
+TMCV
+  15
+15\t273.59\t4,103.78\t476.00\t7,140.00\t3,036.22\t+73.99%
+TMPV
+  22
+25\t505.57\t16,178.18\t312.80\t7,820.00\t-8,358.18\t-51.66%
+ZYDUSLIFE
+5\t926.97\t4,634.85\t1,097.10\t5,485.50\t850.65\t+18.35%`;
+
+// Bundled US sample — exactly the format a US brokerage export tends to use:
+// a header row, tab-separated, $-prefixed prices, fractional share counts.
+const SAMPLE_US = `Ticker\tDescription\tAverage/share\tCurrent Price\tNo of Shares\tInvested Value\tCurrent Value\tCategory
+AMZN\tAmazon.com Inc\t$263.38\t$256.78\t1.701\t$448.020\t$436.80\tTech
+BAC\tBank of America Corporation\t$58.45\t$62.69\t0.894\t$52.250\t$56.04\tBank
+MSFT\tMicrosoft Corp\t$385.69\t$495.63\t0.134\t$51.760\t$66.51\tTech
+TM\tToyota Motor Corp\t$198.00\t$198.20\t0.497\t$98.410\t$98.51\tAutomobile
+GOOGL\tAlphabet Inc Class A\t$345.64\t$344.18\t0.448\t$154.860\t$154.21\tTech`;
+
+// Bundled Bonds sample — header row + tab-separated, ₹-prefixed prices,
+// percentage expected returns, a tenure given in months, and a maturity date
+// as free text (never parsed as a real Date — there's no need to, since the
+// tenure-in-months field already gives everything needed for the maturity
+// projection; the maturity date is purely for display).
+const SAMPLE_BONDS = `Date\tBond Name\tRating\tBond Price\tPurchased Price\tNo of Units\tTotal Price\tExpected Returns\tTenure\tMaturity
+1 Jul 2026\tMuthoot Fincorp\tAA\t₹1,000.00\t₹990.35\t1\t₹990.35\t10.00%\t24 months\t16 July 2028
+7 Jul 2026\tMuthoot Fincorp\tAA\t₹1,000.00\t₹991.91\t3\t₹2,975.71\t10.00%\t24 months\t16 July 2028
+17 Jul 2026\tMuthoot Fincorp\tAA\t₹1,000.00\t₹990.68\t5\t₹4,953.38\t9.75%\t24 months\t16 July 2028
+3 Aug 2026\tMuthoot MCred\tA\t₹1,000.00\t₹997.00\t1\t₹997.00\t10.00%\t13 months\t29 Aug 2027
+10 Aug 2026\tMuthoot MCred\tA\t₹1,000.00\t₹998.57\t3\t₹2,995.71\t10.00%\t13 months\t29 Aug 2027
+11 Aug 2026\tMuthoot MCred\tA\t₹1,000.00\t₹999.09\t2\t₹1,998.18\t10.00%\t13 months\t29 Aug 2027
+1 Sep 2026\tMuthoot Fincorp\tAA\t₹1,000.00\t₹991.07\t1\t₹991.07\t10.00%\t22 months\t16 July 2028
+2 Oct 2026\tMuthoot Fincorp\tAA\t₹1,000.00\t₹995.38\t1\t₹995.38\t10.00%\t23 months\t16 July 2028
+6 Nov 2026\tMuthoot MCred\tA\t₹10,000.00\t₹9,855.88\t1\t₹9,855.88\t10.35%\t36 months\t30 October 2029`;
+
+let holdings = [];
+let bonds = [];
+let addQtyState = []; // parallel array to `holdings`: extra qty the user is considering buying, per row
+
+function num(s){ return parseFloat(String(s).replace(/,/g,'').replace(/[$₹]/g,'')); }
+// Named `inr` for historical reasons (this tool started India-only), but it's
+// now the single money-formatting function for both currencies — it reads
+// CURRENT_COUNTRY at call time rather than being hardcoded to ₹.
+function inr(n, forceSign){
+  const sign = n < 0 ? '-' : (forceSign ? '+' : '');
+  const symbol = COUNTRY_CURRENCY[CURRENT_COUNTRY] || '₹';
+  const locale = COUNTRY_LOCALE[CURRENT_COUNTRY] || 'en-IN';
+  return sign + symbol + Math.abs(n).toLocaleString(locale, {minimumFractionDigits:2, maximumFractionDigits:2});
+}
+function pct(n, forceSign){
+  const sign = n < 0 ? '-' : (forceSign ? '+' : '');
+  return sign + Math.abs(n).toFixed(2) + '%';
+}
+
+
+// ---------- Format A: concatenated ₹-prefixed text, no separators ----------
+// SYMBOL QTY ₹buyAvg ₹buyValue ₹ltp ₹presentValue [+/-]₹pnl [+/-]pnl%
+// e.g. "ARE&M1₹760.00₹760.00₹921.70₹921.70+₹161.70+21.28%..."
+function parseHoldingsConcatenated(raw){
+  const re = /([A-Za-z&]+)(\d+)₹([\d,]+\.\d\d)₹([\d,]+\.\d\d)₹([\d,]+\.\d\d)₹([\d,]+\.\d\d)([+\-])₹([\d,]+\.\d\d)([+\-])([\d.]+)%/g;
+  const out = [];
+  let m;
+  while((m = re.exec(raw)) !== null){
+    const symbol = m[1].toUpperCase();
+    out.push({
+      symbol,
+      qty: num(m[2]),
+      buyAvg: num(m[3]),
+      buyValue: num(m[4]),
+      ltp: num(m[5]),
+      presentValue: num(m[6]),
+      pnl: (m[7]==='-'?-1:1) * num(m[8]),
+      pnlPct: (m[9]==='-'?-1:1) * num(m[10]),
+      category: sectorFor(symbol)
+    });
+  }
+  return out;
+}
+
+// ---------- Format B: tab/newline table copied from a broker's holdings screen ----------
+// Symbol sits on its own line. Some rows also show a smaller "T1" sub-quantity
+// on its own line just above the real quantity — that stray number is ignored.
+// After the symbol, whatever remains (tab- or space-separated, across one or more
+// lines) always ends in exactly these 7 fields in order:
+//   Qty, Buy Avg, Buy Value, LTP, Present Value, P&L, P&L%
+// Taking the LAST 7 tokens before the next symbol sidesteps the stray T1 number
+// regardless of how many extra lines/numbers precede the real row.
+function parseHoldingsTabular(raw){
+  const lines = raw.split(/\r?\n/).map(l=>l.trim()).filter(Boolean);
+  // Matches a bare symbol line ("HDFCBANK"), a symbol with the T1 sub-quantity
+  // inline on the same line ("ARE&M 3" — some broker exports put it here
+  // instead of on its own following line), or a symbol containing hyphens
+  // (rights-entitlement/renounced tickers like "NATCO-RE-R"). The trailing
+  // "\s+\d+" is intentionally NOT captured — it's the same stray T1 number
+  // the "last 7 tokens" logic below already discards, whether it shows up
+  // inline here or on its own following line (that old shape still works:
+  // a lone-digit line fails this regex, so it just falls through to the
+  // token-continuation branch below like any other stray number line).
+  const symbolRe = /^([A-Za-z&-]+)(?:\s+\d+)?$/;
+  const blocks = [];
+  let current = null;
+  lines.forEach(line=>{
+    const m = line.match(symbolRe);
+    if(m){
+      current = {symbol: m[1].toUpperCase(), tokens: []};
+      blocks.push(current);
+    } else if(current){
+      let parts = line.split(/\t+|\s{2,}/).map(s=>s.trim()).filter(Boolean);
+      if(!parts.length) parts = line.split(/\s+/).filter(Boolean);
+      current.tokens.push(...parts);
+    }
+  });
+  const out = [];
+  blocks.forEach(b=>{
+    if(b.tokens.length >= 7){
+      const t = b.tokens.slice(-7);
+      out.push({
+        symbol: b.symbol,
+        qty: num(t[0]),
+        buyAvg: num(t[1]),
+        buyValue: num(t[2]),
+        ltp: num(t[3]),
+        presentValue: num(t[4]),
+        pnl: num(t[5]),
+        pnlPct: num(t[6]),
+        category: sectorFor(b.symbol)
+      });
+    }
+  });
+  return out;
+}
+
+// ---------- Format C: US brokerage export ----------
+// Header row + tab-separated columns:
+//   Ticker  Description  Average/share  Current Price  No of Shares  Invested Value  Current Value  Category
+// Prices/values are $-prefixed, share counts are commonly fractional. Unlike
+// the India formats, Invested Value and Current Value are given directly
+// rather than needing to be computed — and P&L isn't given at all, so it's
+// derived here. Category also comes straight from the data (no SECTOR_MAP
+// lookup needed, since the export already classifies each holding).
+function parseHoldingsUS(raw){
+  const lines = raw.split(/\r?\n/).map(l=>l.trim()).filter(Boolean);
+  const out = [];
+  lines.forEach(line=>{
+    if(!line.includes('\t')) return; // skip the header row and any stray blank/lone lines
+    const cols = line.split('\t').map(c=>c.trim());
+    if(cols.length < 8) return;
+    const [ticker, description, avgPerShare, currentPrice, sharesStr, investedStr, currentStr, category] = cols;
+    if(/^ticker$/i.test(ticker)) return; // header row itself, in case it wasn't filtered above
+    const buyAvg = num(avgPerShare);
+    const ltp = num(currentPrice);
+    const qty = parseFloat(sharesStr);
+    const buyValue = num(investedStr);
+    const presentValue = num(currentStr);
+    const pnl = presentValue - buyValue;
+    const pnlPct = buyValue ? (pnl / buyValue * 100) : 0;
+    out.push({
+      symbol: ticker.toUpperCase(),
+      description,
+      qty, buyAvg, buyValue, ltp, presentValue, pnl, pnlPct,
+      category: category || 'Uncategorized'
+    });
+  });
+  return out;
+}
+
+// Country-explicit version, used when parsing data that isn't necessarily
+// for the currently active tab (e.g. the Overall Portfolio panel, which
+// needs to parse both countries' saved snapshots regardless of which one
+// is currently selected in the UI).
+function parseForCountry(raw, country){
+  if(country === 'US'){
+    return parseHoldingsUS(raw);
+  }
+  if(raw.indexOf('₹') !== -1){
+    return parseHoldingsConcatenated(raw);
+  }
+  return parseHoldingsTabular(raw);
+}
+
+// Format is decided by the explicit country tab, not auto-detected — see
+// the note above CURRENT_COUNTRY for why guessing from content is unreliable.
+function parseHoldings(raw){
+  return parseForCountry(raw, CURRENT_COUNTRY);
+}
+
+function sectorFor(symbol){
+  return sectorOverrides[symbol] || SECTOR_MAP[symbol] || "Uncategorized";
+}
+
+// ---------- Bonds: a fundamentally different asset class from stocks ----------
+// Header row + tab-separated columns:
+//   Date  Bond Name  Rating  Bond Price  Purchased Price  No of Units  Total Price  Expected Returns  Tenure  Maturity
+// Bonds here are held to maturity (not sold/marked-to-market), so there's no
+// "current price"/P&L concept the way stocks have one — instead the useful
+// output is a *projected maturity value*, computed below.
+function parseBonds(raw){
+  const lines = raw.split(/\r?\n/).map(l=>l.trim()).filter(Boolean);
+  const out = [];
+  lines.forEach(line=>{
+    if(!line.includes('\t')) return; // skip the header row and any stray blank lines
+    const cols = line.split('\t').map(c=>c.trim());
+    if(cols.length < 10) return;
+    const [date, bondName, rating, bondPriceStr, purchasedPriceStr, unitsStr, totalPriceStr, expectedReturnStr, tenureStr, maturity] = cols;
+    if(/^date$/i.test(date)) return; // header row itself, in case it wasn't filtered above
+    const tenureMatch = String(tenureStr).match(/([\d.]+)/);
+    out.push({
+      date,
+      bondName,
+      rating,
+      bondPrice: num(bondPriceStr),
+      purchasedPrice: num(purchasedPriceStr),
+      units: parseFloat(unitsStr),
+      totalPrice: num(totalPriceStr),
+      expectedReturn: parseFloat(String(expectedReturnStr).replace(/%/g,'')),
+      tenureMonths: tenureMatch ? parseFloat(tenureMatch[1]) : 0,
+      tenureLabel: tenureStr,
+      maturity
+    });
+  });
+  return out;
+}
+
+// Projected maturity value for one purchase lot. Method: simple (non-
+// compounded) annualized return over the full tenure — Invested × (1 + rate
+// × years) — not Invested × (1+rate)^years. This matches how these platforms
+// typically quote "expected returns" for a fixed-term holding period (a
+// single annualized figure meant to be read as "X% per year for N years"),
+// rather than a compounding reinvestment assumption that would overstate the
+// payout for anything but a true zero-coupon structure. This is an estimate,
+// not the bond's guaranteed legal payout — say so wherever it's shown.
+function projectBondMaturity(b){
+  const years = b.tenureMonths / 12;
+  const gainAmount = b.totalPrice * (b.expectedReturn / 100) * years;
+  const maturityAmount = b.totalPrice + gainAmount;
+  const gainPct = b.totalPrice ? (gainAmount / b.totalPrice * 100) : 0;
+  return { maturityAmount, gainAmount, gainPct };
+}
+
+function renderHoldings(){
+  const tbody = document.querySelector('#holdingsTable tbody');
+  const tfoot = document.querySelector('#holdingsTable tfoot');
+  document.getElementById('holdCount').textContent = holdings.length + ' stocks';
+  if(!holdings.length){
+    tbody.innerHTML = '<tr><td colspan="8" class="empty">No data yet — paste your holdings above.</td></tr>';
+    tfoot.innerHTML = '';
+    return;
+  }
+  tbody.innerHTML = holdings.map(h => `
+    <tr class="fade-in">
+      <td class="sym">${h.symbol}</td>
+      <td>${h.qty}</td>
+      <td>${inr(h.buyAvg)}</td>
+      <td>${inr(h.buyValue)}</td>
+      <td>${inr(h.ltp)}</td>
+      <td>${inr(h.presentValue)}</td>
+      <td class="${h.pnl>=0?'up':'down'}">${inr(h.pnl, true)}</td>
+      <td class="${h.pnlPct>=0?'up':'down'}">${pct(h.pnlPct, true)}</td>
+    </tr>`).join('');
+  const totBuy = holdings.reduce((a,h)=>a+h.buyValue,0);
+  const totPresent = holdings.reduce((a,h)=>a+h.presentValue,0);
+  const totPnl = totPresent - totBuy;
+  const totPnlPct = totBuy ? (totPnl/totBuy*100) : 0;
+  tfoot.innerHTML = `<tr>
+    <td>Total</td><td></td><td></td><td>${inr(totBuy)}</td><td></td>
+    <td>${inr(totPresent)}</td>
+    <td class="${totPnl>=0?'up':'down'}">${inr(totPnl, true)}</td>
+    <td class="${totPnlPct>=0?'up':'down'}">${pct(totPnlPct, true)}</td>
+  </tr>`;
+}
+
+// Same card design as the bond Maturity Timeline (one headline number +
+// context per card), applied to stocks: an overall Portfolio Value card plus
+// Top Gainer / Biggest Drag highlights, so there's a quick-glance summary
+// above the full holdings table instead of only the dense tfoot totals row.
+function renderStockSummaryCards(){
+  const wrap = document.getElementById('stockSummaryCards');
+  if(!holdings.length){
+    wrap.innerHTML = '<div class="empty">Your portfolio summary appears here after parsing.</div>';
+    return;
+  }
+  const totInvested = holdings.reduce((a,h)=>a+h.buyValue,0);
+  const totPresent = holdings.reduce((a,h)=>a+h.presentValue,0);
+  const totGain = totPresent - totInvested;
+  const totGainPct = totInvested ? (totGain/totInvested*100) : 0;
+  const totGainClass = totGain >= 0 ? 'up' : 'down';
+
+  const best = holdings.reduce((a,h)=> h.pnlPct > a.pnlPct ? h : a, holdings[0]);
+  // "Biggest Drag" means the stock actually costing you the most money — so
+  // selected by absolute ₹ loss, not by % loss. A stock down 70% on a ₹500
+  // position is a smaller real drag on the portfolio than one down 10% on a
+  // ₹50,000 position; the card should reflect that, not just the steepest
+  // percentage decline.
+  const worst = holdings.reduce((a,h)=> h.pnl < a.pnl ? h : a, holdings[0]);
+
+  const portfolioCard = `<div class="stat-card fade-in">
+    <div class="stat-card-eyebrow">💼 Portfolio</div>
+    <div class="stat-card-sub">${holdings.length} ${holdings.length === 1 ? 'holding' : 'holdings'}</div>
+    <div class="stat-card-label">Present Value</div>
+    <div class="stat-card-value">${inr(totPresent)}</div>
+    <div class="stat-card-footnote">Invested ${inr(totInvested)}</div>
+    <div class="stat-card-delta ${totGainClass}">${inr(totGain, true)} &nbsp;(${totGainPct>=0?'+':''}${totGainPct.toFixed(2)}%)</div>
+  </div>`;
+
+  // showPct defaults to true (Top Gainer keeps both the ₹ amount and the %
+  // for context); Biggest Drag passes false — the headline is already the
+  // loss amount in ₹, and that card specifically shouldn't repeat it as a
+  // percentage too.
+  const moverCard = (label, emoji, h, cls, showPct = true) => `<div class="stat-card fade-in">
+    <div class="stat-card-eyebrow">${emoji} ${label}</div>
+    <div class="stat-card-sub">${h.symbol}</div>
+    <div class="stat-card-label">Gain / Loss</div>
+    <div class="stat-card-value ${cls}">${inr(h.pnl, true)}</div>
+    <div class="stat-card-footnote">Invested ${inr(h.buyValue)} → Present ${inr(h.presentValue)}</div>
+    ${showPct ? `<div class="stat-card-delta ${cls}">${pct(h.pnlPct, true)}</div>` : ''}
+  </div>`;
+
+  let cards = portfolioCard;
+  if(holdings.length > 1){
+    cards += moverCard('Top Gainer', '🏆', best, 'up') + moverCard('Biggest Drag', '📉', worst, 'down', false);
+  } else {
+    // A single holding can't meaningfully have a separate "best" vs "worst" —
+    // showing both would just be the same stock twice, which reads as a bug,
+    // not a feature, so skip the mover cards entirely in that case.
+    cards += moverCard('Your Holding', '📊', best, best.pnl >= 0 ? 'up' : 'down');
+  }
+  wrap.innerHTML = cards;
+}
+
+// Shared by the sector table and the pie chart, so both always agree on the numbers.
+// Groups by each holding's `category` field (set at parse time via the
+// SECTOR_MAP lookup in sectorFor()).
+function getSectorTotals(){
+  const totals = {};
+  const totalAll = holdings.reduce((a,h)=>a+h.buyValue,0);
+  holdings.forEach(h=>{
+    const s = h.category || 'Uncategorized';
+    totals[s] = (totals[s]||0) + h.buyValue;
+  });
+  return { totals, totalAll };
+}
+
+// ---------- Sector donut chart: largest to smallest, 3D-shaded, with a live-linked legend ----------
+function polarToXY(cx, cy, r, angleDeg){
+  const rad = (angleDeg - 90) * Math.PI / 180;
+  return { x: cx + r * Math.cos(rad), y: cy + r * Math.sin(rad) };
+}
+
+// Lightens (positive percent) or darkens (negative percent) a hex color —
+// used to build the light-to-dark gradient that gives each donut slice its
+// beveled, slightly-3D look.
+function shadeColor(hex, percent){
+  const num = parseInt(hex.replace('#',''), 16);
+  let r = (num >> 16) & 0xFF, g = (num >> 8) & 0xFF, b = num & 0xFF;
+  const adj = Math.round(2.55 * percent);
+  r = Math.min(255, Math.max(0, r + adj));
+  g = Math.min(255, Math.max(0, g + adj));
+  b = Math.min(255, Math.max(0, b + adj));
+  return `rgb(${r},${g},${b})`;
+}
+function donutSlicePath(cx, cy, rOuter, rInner, startAngle, endAngle){
+  const largeArc = (endAngle - startAngle) <= 180 ? 0 : 1;
+  const po1 = polarToXY(cx, cy, rOuter, endAngle);
+  const po2 = polarToXY(cx, cy, rOuter, startAngle);
+  const pi1 = polarToXY(cx, cy, rInner, startAngle);
+  const pi2 = polarToXY(cx, cy, rInner, endAngle);
+  return `M ${po1.x.toFixed(2)} ${po1.y.toFixed(2)} `
+    + `A ${rOuter} ${rOuter} 0 ${largeArc} 0 ${po2.x.toFixed(2)} ${po2.y.toFixed(2)} `
+    + `L ${pi1.x.toFixed(2)} ${pi1.y.toFixed(2)} `
+    + `A ${rInner} ${rInner} 0 ${largeArc} 1 ${pi2.x.toFixed(2)} ${pi2.y.toFixed(2)} Z`;
+}
+
+// Generic donut renderer shared by every allocation chart on the page (sector,
+// market-cap tier, and any future grouping). `rows` is an already-ordered
+// array of [label, value] pairs — this function only draws, it never sorts,
+// so each caller controls its own ordering logic. `idPrefix` namespaces the
+// SVG gradient/filter ids so multiple donuts can coexist on one page without
+// id collisions.
+function renderDonut(wrapId, rows, totalAll, colorFn, totalLabel, idPrefix){
+  const wrap = document.getElementById(wrapId);
+  if(!rows.length || !totalAll){
+    wrap.innerHTML = '<div class="empty">Chart appears here after parsing.</div>';
+    return;
+  }
+
+  const size = 220, cx = size/2, cy = size/2;
+  const rOuter = size/2 - 6, rInner = rOuter * 0.34;
+  const POP = 9; // px a slice shifts outward along its own bisector on hover
+  const maxShare = Math.max(...rows.map(([,v]) => v/totalAll*100));
+  let angle = 0;
+  const gradients = [];
+  const slicesSVG = [];
+  const legendRows = [];
+  rows.forEach(([label, val], i)=>{
+    const color = colorFn(label);
+    const pctShare = val/totalAll*100;
+    const barWidth = maxShare ? (pctShare/maxShare*100) : 0;
+    const sweep = (val/totalAll) * 360;
+    const safeLabel = String(label).replace(/"/g, '&quot;');
+    const gradId = `${idPrefix}Grad${i}`;
+    // Light-to-dark diagonal gradient per slice = the "bevelled ring" 3D look.
+    gradients.push(`<linearGradient id="${gradId}" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="${shadeColor(color, 22)}"/>
+      <stop offset="55%" stop-color="${color}"/>
+      <stop offset="100%" stop-color="${shadeColor(color, -18)}"/>
+    </linearGradient>`);
+
+    if(rows.length === 1){
+      // A single group: a full ring, no bisector to pop toward.
+      slicesSVG.push(`<circle class="pie-slice" data-key="${idPrefix}-${safeLabel}" cx="${cx}" cy="${cy}" r="${(rOuter+rInner)/2}" fill="none" stroke="url(#${gradId})" stroke-width="${rOuter-rInner}"><title>${label}: ${inr(val)} (${pctShare.toFixed(2)}%)</title></circle>`);
+    } else {
+      const start = angle;
+      const end = angle + sweep;
+      const mid = (start + end) / 2;
+      const dirRad = (mid - 90) * Math.PI / 180;
+      const tx = (Math.cos(dirRad) * POP).toFixed(2);
+      const ty = (Math.sin(dirRad) * POP).toFixed(2);
+      slicesSVG.push(`<path class="pie-slice" data-key="${idPrefix}-${safeLabel}" style="--tx:${tx}px;--ty:${ty}px" d="${donutSlicePath(cx, cy, rOuter, rInner, start, end)}" fill="url(#${gradId})"><title>${label}: ${inr(val)} (${pctShare.toFixed(2)}%)</title></path>`);
+      angle = end;
+    }
+    legendRows.push(`
+      <div class="pie-legend-row" data-key="${idPrefix}-${safeLabel}">
+        <span class="pie-swatch" style="background:${color}"></span>
+        <span class="pie-legend-name">${label}</span>
+        <span class="pie-legend-bar-track"><span class="pie-legend-bar-fill" style="width:${barWidth.toFixed(0)}%;background:${color};"></span></span>
+        <span class="pie-legend-val">${inr(val)}</span>
+        <span class="pie-legend-pct">${pctShare.toFixed(2)}%</span>
+      </div>`);
+  });
+
+  wrap.innerHTML = `
+    <div class="pie-svg-holder fade-in">
+      <svg class="pie-svg" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">
+        <defs>
+          ${gradients.join('')}
+          <filter id="${idPrefix}DonutShadow" x="-30%" y="-30%" width="160%" height="160%">
+            <feDropShadow dx="0" dy="5" stdDeviation="6" flood-color="rgba(0,0,0,0.28)"/>
+          </filter>
+          <radialGradient id="${idPrefix}GlossHighlight" cx="50%" cy="18%" r="55%">
+            <stop offset="0%" stop-color="rgba(255,255,255,0.55)"/>
+            <stop offset="100%" stop-color="rgba(255,255,255,0)"/>
+          </radialGradient>
+        </defs>
+        <g filter="url(#${idPrefix}DonutShadow)">${slicesSVG.join('')}</g>
+        <circle cx="${cx}" cy="${cy}" r="${rOuter+2}" fill="url(#${idPrefix}GlossHighlight)" style="mix-blend-mode:overlay;pointer-events:none;"/>
+      </svg>
+      <div class="pie-total-below">
+        <div class="pie-center-label">${totalLabel}</div>
+        <div class="pie-center-value">${inr(totalAll)}</div>
+      </div>
+    </div>
+    <div class="pie-legend fade-in">${legendRows.join('')}</div>
+  `;
+
+  // Bidirectional hover: hovering a slice pops it out and highlights its legend
+  // row; hovering the legend row does the same to the slice. Both directions
+  // share one handler so they can never drift out of sync. `data-key` is
+  // namespaced per chart, so this never cross-links between two donuts.
+  const setActive = (key, active)=>{
+    wrap.querySelectorAll(`[data-key="${key.replace(/"/g,'\\"')}"]`).forEach(el=>{
+      el.classList.toggle('pop', active);
+    });
+  };
+  wrap.querySelectorAll('[data-key]').forEach(el=>{
+    el.addEventListener('mouseenter', ()=>setActive(el.dataset.key, true));
+    el.addEventListener('mouseleave', ()=>setActive(el.dataset.key, false));
+  });
+}
+
+function renderSectorPie(){
+  const { totals, totalAll } = getSectorTotals();
+  // Largest to smallest — same order as the table above it.
+  const rows = Object.entries(totals).sort((a,b)=>b[1]-a[1]);
+  renderDonut('pieWrap', rows, totalAll, colorForSector, 'Total Invested', 'sec');
+}
+
+// ---------- Market cap tier map (Large / Mid / Small) ----------
+// This is a manually-maintained snapshot, not a live feed — there is no
+// reliable way to fetch live market-cap data from pure client-side JS for
+// either country. NSE's API blocks direct cross-origin browser requests, and
+// every CORS-friendly alternative (US or Indian) needs a personal API key,
+// which would sit exposed in this public repo's source. So this works the
+// same way SECTOR_MAP does: values sourced and checked periodically, not
+// real-time.
+// India tier boundaries follow AMFI's most recent categorisation (~mid-2026):
+// Large cap ≥ ₹1,06,300 Cr; Mid cap ₹33,500–1,06,300 Cr; Small cap below that.
+const MARKET_CAP_CR = {
+  "ARE&M": 16000,
+  "DRREDDY": 110000,
+  "FEDERALBNK": 48000,
+  "HDFCBANK": 1450000,
+  "IDFCFIRSTB": 75440,
+  "INDUSINDBK": 70000,
+  "INFY": 620000,
+  "ITC": 520000,
+  "ITCHOTELS": 46000,
+  "JYOTHYLAB": 10300,
+  "MANAPPURAM": 27000,
+  "MUTHOOTFIN": 122000,
+  "NATCOPHARM": 15100,
+  "SOUTHBANK": 9500,
+  "TCS": 1150000,
+  "TMCV": 85000,
+  "TMPV": 290000,
+  "ZYDUSLIFE": 95000
+  // ITBEES is an ETF (a basket of IT stocks), not an individual company —
+  // it has no market cap of its own, so it's deliberately left out and
+  // tierForSymbol() routes it to an "ETF / Fund" bucket instead.
+};
+// US tier boundaries follow the standard convention used by most US index
+// providers: Large cap ≥ $10B; Mid cap $2B–$10B; Small cap below $2B.
+// Values are approximate market cap in $ billions.
+const MARKET_CAP_USD_B = {
+  "AMZN": 2400,
+  "BAC": 330,
+  "MSFT": 3700,
+  "TM": 260,
+  "GOOGL": 2300
+};
+const CAP_TIER_ORDER = ["Large Cap", "Mid Cap", "Small Cap", "ETF / Fund"];
+const CAP_TIER_COLORS = {
+  "Large Cap": "#0066B1",   // BMW blue — same "steady/blue-chip" association as Banking
+  "Mid Cap": "#F0B429",     // amber — the in-between tier
+  "Small Cap": "#E7222E",   // BMW red — highest volatility/risk tier
+  "ETF / Fund": "#9E9E9E"   // neutral gray — not a single-company risk tier
+};
+function tierForSymbol(symbol){
+  if(CURRENT_COUNTRY === 'US'){
+    if(!(symbol in MARKET_CAP_USD_B)) return "ETF / Fund";
+    const b = MARKET_CAP_USD_B[symbol];
+    if(b >= 10) return "Large Cap";
+    if(b >= 2) return "Mid Cap";
+    return "Small Cap";
+  }
+  if(!(symbol in MARKET_CAP_CR)) return "ETF / Fund";
+  const cr = MARKET_CAP_CR[symbol];
+  if(cr >= 106300) return "Large Cap";
+  if(cr >= 33500) return "Mid Cap";
+  return "Small Cap";
+}
+function getMarketCapTotals(){
+  const totals = {};
+  const totalAll = holdings.reduce((a,h)=>a+h.buyValue,0);
+  holdings.forEach(h=>{
+    const tier = tierForSymbol(h.symbol);
+    totals[tier] = (totals[tier]||0) + h.buyValue;
+  });
+  return { totals, totalAll };
+}
+function renderMarketCapPie(){
+  const { totals, totalAll } = getMarketCapTotals();
+  // Fixed conventional order (Large → Mid → Small → ETF), not sorted by
+  // value — for a cap-size chart, reading order matters more than magnitude.
+  const rows = CAP_TIER_ORDER.filter(t => totals[t] !== undefined).map(t => [t, totals[t]]);
+  renderDonut('capWrap', rows, totalAll, (t)=>CAP_TIER_COLORS[t] || '#9E9E9E', 'Total Invested', 'cap');
+}
+
+function avgChangeHTML(delta){
+  if(Math.abs(delta) < 0.005) return '<span style="color:var(--ink-dim);">&mdash; no change</span>';
+  if(delta > 0) return `<span class="down">&#9650; +${inr(delta)}</span>`;
+  return `<span class="up">&#9660; ${inr(delta)}</span>`;
+}
+
+function renderSimulator(){
+  const tbody = document.querySelector('#simTable tbody');
+  addQtyState = holdings.map(()=>0);
+  if(!holdings.length){
+    tbody.innerHTML = '<tr><td colspan="9" class="empty">Simulator appears here after parsing.</td></tr>';
+    renderSimSectors();
+    return;
+  }
+  tbody.innerHTML = holdings.map((h,i)=>`
+    <tr class="fade-in" data-i="${i}">
+      <td class="sym">${h.symbol}</td>
+      <td>${h.qty}</td>
+      <td>${inr(h.buyAvg)}</td>
+      <td>${inr(h.ltp)}</td>
+      <td><input type="number" min="0" step="1" class="qty-add" data-i="${i}" placeholder="0"></td>
+      <td class="new-qty">${h.qty}</td>
+      <td class="avg-change">${avgChangeHTML(0)}</td>
+      <td class="new-avg">${inr(h.buyAvg)}</td>
+      <td class="new-value">${inr(h.qty * h.buyAvg)}</td>
+    </tr>`).join('');
+
+  tbody.querySelectorAll('.qty-add').forEach(inp=>{
+    inp.addEventListener('input', (e)=>{
+      const i = +e.target.dataset.i;
+      const h = holdings[i];
+      const addQty = Math.max(0, parseFloat(e.target.value) || 0);
+      const newQty = h.qty + addQty;
+      const newValue = (h.qty * h.buyAvg) + addQty * h.ltp;
+      const newAvg = newQty ? newValue / newQty : 0;
+      addQtyState[i] = addQty;
+      const row = e.target.closest('tr');
+      row.querySelector('.new-qty').textContent = newQty;
+      row.querySelector('.avg-change').innerHTML = avgChangeHTML(newAvg - h.buyAvg);
+      row.querySelector('.new-avg').textContent = inr(newAvg);
+      row.querySelector('.new-value').textContent = inr(newValue);
+      renderSimSectors();
+    });
+  });
+
+  renderSimSectors();
+}
+
+// Shows how sector weightage (by invested value) would shift if the Add Qty
+// entries in the simulator above were actually bought at current LTP.
+function renderSimSectors(){
+  const tbody = document.querySelector('#simSectorTable tbody');
+  if(!holdings.length){
+    tbody.innerHTML = '<tr><td colspan="4" class="empty">Add share quantities above to see the updated mix.</td></tr>';
+    return;
+  }
+  const current = {};
+  const updated = {};
+  holdings.forEach((h,i)=>{
+    const s = h.category || 'Uncategorized';
+    const addQty = addQtyState[i] || 0;
+    const newInvested = h.buyValue + addQty * h.ltp;
+    current[s] = (current[s]||0) + h.buyValue;
+    updated[s] = (updated[s]||0) + newInvested;
+  });
+  const totalUpdated = Object.values(updated).reduce((a,v)=>a+v,0);
+  const sectors = Object.keys(updated).sort((a,b)=>updated[b]-updated[a]);
+  tbody.innerHTML = sectors.map(s=>{
+    const cur = current[s]||0;
+    const upd = updated[s]||0;
+    const w = totalUpdated ? (upd/totalUpdated*100) : 0;
+    const changed = Math.abs(upd-cur) > 0.005;
+    return `<tr>
+      <td class="sector-name">${s}</td>
+      <td>${inr(cur)}</td>
+      <td class="${changed?'up':''}">${inr(upd)}</td>
+      <td>${w.toFixed(2)}%</td>
+    </tr>`;
+  }).join('');
+}
+
+function renderAll(){
+  renderHoldings();
+  renderStockSummaryCards();
+  renderSectorPie();
+  renderMarketCapPie();
+  renderSimulator();
+}
+
+function renderBondHoldings(){
+  const tbody = document.querySelector('#bondsTable tbody');
+  const tfoot = document.querySelector('#bondsTable tfoot');
+  document.getElementById('bondCount').textContent = bonds.length + (bonds.length === 1 ? ' bond' : ' bonds');
+  if(!bonds.length){
+    tbody.innerHTML = '<tr><td colspan="10" class="empty">No data yet — paste your bond purchases above.</td></tr>';
+    tfoot.innerHTML = '';
+    return;
+  }
+  tbody.innerHTML = bonds.map(b => `
+    <tr class="fade-in">
+      <td>${b.date}</td>
+      <td class="sym">${b.bondName}</td>
+      <td>${b.rating}</td>
+      <td>${inr(b.bondPrice)}</td>
+      <td>${inr(b.purchasedPrice)}</td>
+      <td>${b.units}</td>
+      <td>${inr(b.totalPrice)}</td>
+      <td class="up">${b.expectedReturn.toFixed(2)}%</td>
+      <td>${b.tenureLabel}</td>
+      <td>${b.maturity}</td>
+    </tr>`).join('');
+  const totInvested = bonds.reduce((a,b)=>a+b.totalPrice,0);
+  tfoot.innerHTML = `<tr>
+    <td>Total</td><td></td><td></td><td></td><td></td><td></td>
+    <td>${inr(totInvested)}</td><td></td><td></td><td></td>
+  </tr>`;
+}
+
+// Groups lots by maturity date, since lots maturing on the same date pay out
+// together — the question "how much will I actually receive, and when" is
+// answered per payout date, not per individual purchase. Lots are still kept
+// distinct everywhere upstream (Bond Holdings table, the per-lot projection
+// math); only this summary view collapses them. Sorted chronologically
+// (soonest payout first) using native Date parsing, which handles every
+// maturity-date format seen so far ("16 July 2028", "29 Aug 2027", "30
+// October 2029") — if a future format doesn't parse, it sorts last via the
+// NaN fallback below rather than throwing.
+function groupBondsByMaturity(){
+  const groups = {};
+  bonds.forEach(b=>{
+    if(!groups[b.maturity]) groups[b.maturity] = [];
+    groups[b.maturity].push(b);
+  });
+  return Object.entries(groups).sort((a,b)=>{
+    const da = new Date(a[0]).getTime();
+    const db = new Date(b[0]).getTime();
+    if(isNaN(da) && isNaN(db)) return 0;
+    if(isNaN(da)) return 1;
+    if(isNaN(db)) return -1;
+    return da - db;
+  });
+}
+
+function renderBondProjection(){
+  const tbody = document.querySelector('#bondProjectionTable tbody');
+  const tfoot = document.querySelector('#bondProjectionTable tfoot');
+  if(!bonds.length){
+    tbody.innerHTML = '<tr><td colspan="6" class="empty">Maturity projection appears here after parsing.</td></tr>';
+    tfoot.innerHTML = '';
+    return;
+  }
+  const groups = groupBondsByMaturity();
+  tbody.innerHTML = groups.map(([maturity, lots])=>{
+    const invested = lots.reduce((a,b)=>a+b.totalPrice,0);
+    const maturityAmount = lots.reduce((a,b)=>a+projectBondMaturity(b).maturityAmount,0);
+    const gainAmount = maturityAmount - invested;
+    const gainPct = invested ? (gainAmount/invested*100) : 0;
+    const names = [...new Set(lots.map(b=>b.bondName))];
+    const nameLabel = names.length === 1 ? names[0] : names.join(', ');
+    const lotNote = lots.length > 1 ? ` <span style="color:var(--ink-dim);font-weight:500;">(${lots.length} lots)</span>` : '';
+    return `<tr class="fade-in">
+      <td>${maturity}</td>
+      <td class="sym">${nameLabel}${lotNote}</td>
+      <td>${inr(invested)}</td>
+      <td>${inr(maturityAmount)}</td>
+      <td class="up">${inr(gainAmount, true)}</td>
+      <td class="up">${gainPct.toFixed(2)}%</td>
+    </tr>`;
+  }).join('');
+  const totInvested = bonds.reduce((a,b)=>a+b.totalPrice,0);
+  const totMaturity = bonds.reduce((a,b)=>a+projectBondMaturity(b).maturityAmount,0);
+  const totGain = totMaturity - totInvested;
+  const totGainPct = totInvested ? (totGain/totInvested*100) : 0;
+  tfoot.innerHTML = `<tr>
+    <td>Total</td><td></td>
+    <td>${inr(totInvested)}</td>
+    <td>${inr(totMaturity)}</td>
+    <td class="up">${inr(totGain, true)}</td>
+    <td class="up">${totGainPct.toFixed(2)}%</td>
+  </tr>`;
+}
+
+// Card-based view of the same grouped-by-maturity-date data the projection
+// table shows — answers "how much on this date, and how much did I gain"
+// at a glance, one card per payout date, rather than a dense table row.
+// Reuses groupBondsByMaturity() so the two views can never disagree.
+function renderMaturityTimeline(){
+  const wrap = document.getElementById('maturityTimeline');
+  if(!bonds.length){
+    wrap.innerHTML = '<div class="empty">Your maturity timeline appears here after parsing.</div>';
+    return;
+  }
+  const groups = groupBondsByMaturity();
+  wrap.innerHTML = groups.map(([maturity, lots])=>{
+    const invested = lots.reduce((a,b)=>a+b.totalPrice,0);
+    const maturityAmount = lots.reduce((a,b)=>a+projectBondMaturity(b).maturityAmount,0);
+    const gainAmount = maturityAmount - invested;
+    const gainPct = invested ? (gainAmount/invested*100) : 0;
+    const names = [...new Set(lots.map(b=>b.bondName))];
+    const nameLabel = names.join(', ') + (lots.length > names.length ? ` (${lots.length} lots)` : '');
+    const gainClass = gainAmount >= 0 ? 'up' : 'down';
+    return `<div class="stat-card fade-in">
+      <div class="stat-card-eyebrow">📅 ${maturity}</div>
+      <div class="stat-card-sub">${nameLabel}</div>
+      <div class="stat-card-label">You'll receive</div>
+      <div class="stat-card-value">${inr(maturityAmount)}</div>
+      <div class="stat-card-footnote">Invested ${inr(invested)}</div>
+      <div class="stat-card-delta ${gainClass}">${inr(gainAmount, true)} &nbsp;(${gainPct>=0?'+':''}${gainPct.toFixed(2)}%)</div>
+    </div>`;
+  }).join('');
+}
+
+function renderBonds(){
+  renderBondHoldings();
+  renderMaturityTimeline();
+  renderBondProjection();
+}
+
+// ---------- Skeleton loading state ----------
+function skeletonRow(cols){
+  return '<tr class="skeleton-row">' +
+    Array.from({length:cols}).map(()=>'<td><div class="skeleton-bar"></div></td>').join('') +
+    '</tr>';
+}
+function showSkeletons(){
+  if(CURRENT_COUNTRY === 'BONDS'){
+    document.querySelector('#bondsTable tbody').innerHTML = Array.from({length:4}).map(()=>skeletonRow(10)).join('');
+    document.querySelector('#bondsTable tfoot').innerHTML = '';
+    document.getElementById('maturityTimeline').innerHTML = Array.from({length:3}).map(()=>'<div class="skeleton-bar" style="flex:1 1 220px;min-width:220px;height:140px;border-radius:22px;"></div>').join('');
+    document.querySelector('#bondProjectionTable tbody').innerHTML = Array.from({length:4}).map(()=>skeletonRow(6)).join('');
+    document.querySelector('#bondProjectionTable tfoot').innerHTML = '';
+    return;
+  }
+  document.querySelector('#holdingsTable tbody').innerHTML = Array.from({length:4}).map(()=>skeletonRow(8)).join('');
+  document.querySelector('#holdingsTable tfoot').innerHTML = '';
+  document.getElementById('stockSummaryCards').innerHTML = Array.from({length:3}).map(()=>'<div class="skeleton-bar" style="flex:1 1 220px;min-width:220px;height:140px;border-radius:22px;"></div>').join('');
+  document.getElementById('pieWrap').innerHTML = '<div class="skeleton-bar" style="width:220px;height:220px;border-radius:50%;"></div>';
+  document.querySelector('#simTable tbody').innerHTML = Array.from({length:4}).map(()=>skeletonRow(9)).join('');
+  document.querySelector('#simSectorTable tbody').innerHTML = Array.from({length:3}).map(()=>skeletonRow(4)).join('');
+}
+
+const parseBtn = document.getElementById('parseBtn');
+
+// ---------- Country tab wiring ----------
+// Updates the currency-dependent labels that can't just re-read inr() live —
+// static header/heading text needs an explicit rewrite when the tab flips.
+function applyCountry(country){
+  CURRENT_COUNTRY = country;
+  document.getElementById('countryIN').classList.toggle('active', country === 'IN');
+  document.getElementById('countryUS').classList.toggle('active', country === 'US');
+  document.getElementById('countryBONDS').classList.toggle('active', country === 'BONDS');
+
+  // Bonds use an entirely different set of panels (no sector/market-cap/
+  // simulator concepts apply to a held-to-maturity instrument) — swap the
+  // whole panel group rather than trying to relabel the stock panels.
+  document.getElementById('stockPanels').style.display = country === 'BONDS' ? 'none' : '';
+  document.getElementById('bondPanels').style.display = country === 'BONDS' ? '' : 'none';
+
+  if(country !== 'BONDS'){
+    document.getElementById('ltpHeader').textContent = country === 'US' ? 'Price' : 'LTP';
+    document.getElementById('sectorHeading').textContent = country === 'US' ? '2 · Category Allocation' : '2 · Sector Allocation';
+    document.getElementById('capHint').textContent = country === 'US'
+      ? 'Tiers follow the standard US convention (Large Cap ≥ $10B, Mid Cap ≥ $2B, else Small Cap), applied to each holding\'s approximate market cap.'
+      : 'Tiers follow AMFI\'s latest classification (Large Cap ≥ ₹1,06,300 cr, Mid Cap ≥ ₹33,500 cr, else Small Cap), applied to each holding\'s approximate market cap. ITBEES (an index ETF, not a company) is grouped separately under "ETF / Fund" since it has no market cap of its own.';
+  }
+  document.getElementById('rawInput').placeholder =
+    country === 'US' ? 'Paste your US holdings export here — header row + tab-separated columns: Ticker, Description, Average/share, Current Price, No of Shares, Invested Value, Current Value, Category.'
+    : country === 'BONDS' ? 'Paste your bond purchases here — header row + tab-separated columns: Date, Bond Name, Rating, Bond Price, Purchased Price, No of Units, Total Price, Expected Returns, Tenure, Maturity.'
+    : 'Paste your holdings snapshot here — either the ₹-concatenated text or the tab-separated table copied straight from your broker\'s holdings screen. Both formats are auto-detected.';
+}
+document.getElementById('countryIN').addEventListener('click', ()=>{
+  applyCountry('IN');
+  const fromStorage = loadLastData('IN');
+  document.getElementById('rawInput').value = fromStorage ? fromStorage.raw : SAMPLE;
+  parseBtn.click();
+});
+document.getElementById('countryUS').addEventListener('click', ()=>{
+  applyCountry('US');
+  const fromStorage = loadLastData('US');
+  document.getElementById('rawInput').value = fromStorage ? fromStorage.raw : SAMPLE_US;
+  parseBtn.click();
+});
+document.getElementById('countryBONDS').addEventListener('click', ()=>{
+  applyCountry('BONDS');
+  const fromStorage = loadLastData('BONDS');
+  document.getElementById('rawInput').value = fromStorage ? fromStorage.raw : SAMPLE_BONDS;
+  parseBtn.click();
+});
+
+// ---------- Persistence: last pasted data (per country) + shareable link ----------
+// Each country's raw snapshot is stored under its own key so switching tabs
+// and building the other country's tables never overwrites/loses the first
+// one — this is what lets the Overall Portfolio panel show both at once.
+// `ledger-last-country` separately remembers which tab was active last,
+// purely for which one to reopen; it doesn't gate what Overview can see.
+function storageKeyFor(country){ return 'ledger-data-' + country; }
+
+function saveLastData(raw, country){
+  try{
+    localStorage.setItem(storageKeyFor(country), JSON.stringify({ raw }));
+    localStorage.setItem('ledger-last-country', country);
+  }catch(e){}
+}
+function loadLastData(country){
+  try{
+    const stored = localStorage.getItem(storageKeyFor(country));
+    if(!stored) return null;
+    const parsed = JSON.parse(stored);
+    if(parsed && typeof parsed.raw === 'string') return { raw: parsed.raw, country };
+  }catch(e){}
+  return null;
+}
+function loadLastActiveCountry(){
+  try{ return localStorage.getItem('ledger-last-country') || 'IN'; }catch(e){ return 'IN'; }
+}
+// btoa/atob only handle Latin1, so the ₹ symbol and similar need this escape hop.
+function encodeForLink(obj){
+  return btoa(unescape(encodeURIComponent(JSON.stringify(obj))));
+}
+function decodeFromLink(encoded){
+  return JSON.parse(decodeURIComponent(escape(atob(encoded))));
+}
+function getDataFromUrl(){
+  const hash = window.location.hash;
+  if(hash.startsWith('#data=')){
+    try{ return decodeFromLink(decodeURIComponent(hash.slice(6))); }
+    catch(e){ return null; }
+  }
+  return null;
+}
+
+// ---------- Overall Portfolio: combines both countries' saved snapshots ----------
+// Not a live FX rate — same constraint as MARKET_CAP_CR/MARKET_CAP_USD_B (no
+// CORS-friendly free FX API a static page can call without exposing a key).
+// Update this periodically by searching the current USD/INR rate; it drifts
+// enough over months to matter for a combined total, even if day-to-day noise
+// doesn't.
+const FX_RATE_USD_TO_INR = 95.5;
+
+// Reads a country's last-saved snapshot (independent of which tab is
+// currently active) and returns its totals, or null if that country has
+// never been built. Uses parseForCountry (not the CURRENT_COUNTRY-reading
+// parseHoldings) specifically so this doesn't depend on/disturb whatever the
+// person currently has open in the paste box.
+function computeCountryTotals(country){
+  const stored = loadLastData(country);
+  if(!stored) return null;
+  let rows;
+  try{ rows = parseForCountry(stored.raw, country); }catch(e){ return null; }
+  if(!rows.length) return null;
+  const invested = rows.reduce((a,h)=>a+h.buyValue,0);
+  const present = rows.reduce((a,h)=>a+h.presentValue,0);
+  return { invested, present, pnl: present - invested, pnlPct: invested ? (present-invested)/invested*100 : 0 };
+}
+
+// Always renders in ₹ regardless of the currently active tab — this is a
+// combined view, so it can't follow CURRENT_COUNTRY the way inr() does. A
+// tiny local formatter keeps that independent of the global setting.
+function fmtOverviewINR(n, forceSign){
+  const sign = n < 0 ? '-' : (forceSign ? '+' : '');
+  return sign + '₹' + Math.abs(n).toLocaleString('en-IN', {minimumFractionDigits:2, maximumFractionDigits:2});
+}
+
+function renderOverview(){
+  const tbody = document.querySelector('#overviewTable tbody');
+  const tfoot = document.querySelector('#overviewTable tfoot');
+  const hint = document.getElementById('overviewHint');
+  const inTotals = computeCountryTotals('IN');
+  const usTotals = computeCountryTotals('US');
+
+  if(!inTotals && !usTotals){
+    tbody.innerHTML = '<tr><td colspan="5" class="empty">Build a portfolio in the India or US tab below — each one you build gets added here automatically.</td></tr>';
+    tfoot.innerHTML = '';
+    hint.textContent = '';
+    return;
+  }
+
+  const rows = [];
+  if(inTotals) rows.push(['India (₹)', inTotals.invested, inTotals.present, inTotals.pnl, inTotals.pnlPct]);
+  if(usTotals) rows.push(['US ($ → ₹)', usTotals.invested*FX_RATE_USD_TO_INR, usTotals.present*FX_RATE_USD_TO_INR, usTotals.pnl*FX_RATE_USD_TO_INR, usTotals.pnlPct]);
+
+  tbody.innerHTML = rows.map(([label, inv, pres, pnl, pnlPct])=>`
+    <tr class="fade-in">
+      <td>${label}</td>
+      <td>${fmtOverviewINR(inv)}</td>
+      <td>${fmtOverviewINR(pres)}</td>
+      <td class="${pnl>=0?'up':'down'}">${fmtOverviewINR(pnl, true)}</td>
+      <td class="${pnlPct>=0?'up':'down'}">${pct(pnlPct, true)}</td>
+    </tr>`).join('');
+
+  const totInv = rows.reduce((a,r)=>a+r[1],0);
+  const totPres = rows.reduce((a,r)=>a+r[2],0);
+  const totPnl = totPres - totInv;
+  const totPnlPct = totInv ? (totPnl/totInv*100) : 0;
+  tfoot.innerHTML = `<tr>
+    <td>Combined</td>
+    <td>${fmtOverviewINR(totInv)}</td>
+    <td>${fmtOverviewINR(totPres)}</td>
+    <td class="${totPnl>=0?'up':'down'}">${fmtOverviewINR(totPnl, true)}</td>
+    <td class="${totPnlPct>=0?'up':'down'}">${pct(totPnlPct, true)}</td>
+  </tr>`;
+
+  hint.textContent = (inTotals && usTotals)
+    ? `US amounts converted at an approximate ₹${FX_RATE_USD_TO_INR}/$ rate (not live) — treat the combined total as directional, not exact.`
+    : (usTotals ? `Converted at an approximate ₹${FX_RATE_USD_TO_INR}/$ rate (not live). Build an India portfolio too to see it combined here.`
+               : 'Build a US portfolio too (tab above) to see it combined here.');
+}
+
+parseBtn.addEventListener('click', ()=>{
+  const raw = document.getElementById('rawInput').value.trim();
+  const msg = document.getElementById('parseMsg');
+  if(!raw){ msg.textContent = 'Paste your holdings text first.'; return; }
+
+  parseBtn.classList.add('loading');
+  parseBtn.disabled = true;
+  msg.textContent = '';
+  showSkeletons();
+
+  // Brief, deliberate pause so the shimmer is visible — this is instant math,
+  // but a hard cut from skeleton to full tables reads as a glitch, not speed.
+  setTimeout(()=>{
+    parseBtn.classList.remove('loading');
+    parseBtn.disabled = false;
+
+    if(CURRENT_COUNTRY === 'BONDS'){
+      const parsed = parseBonds(raw);
+      if(!parsed.length){
+        msg.textContent = "Couldn't find any rows in that format — check it matches Date/Bond Name/Rating/Bond Price/Purchased Price/No of Units/Total Price/Expected Returns/Tenure/Maturity, tab-separated with a header row.";
+        renderBonds();
+        return;
+      }
+      bonds = parsed;
+      saveLastData(raw, 'BONDS');
+      msg.textContent = `Parsed ${parsed.length} bond ${parsed.length === 1 ? 'purchase' : 'purchases'}. Saved on this device.`;
+      document.getElementById('asof').textContent = new Date().toLocaleString('en-IN', {dateStyle:'medium', timeStyle:'short'});
+      renderBonds();
+      return;
+    }
+
+    const parsed = parseHoldings(raw);
+    if(!parsed.length){
+      msg.textContent = CURRENT_COUNTRY === 'US'
+        ? "Couldn't find any rows in that format — check it matches Ticker/Description/Average per share/Current Price/No of Shares/Invested Value/Current Value/Category, tab-separated with a header row."
+        : "Couldn't find any rows in that format — check it matches Symbol/Qty/Buy Avg/Buy Value/LTP/Present Value/P&L/P&L% with no separators.";
+      renderAll();
+      return;
+    }
+    holdings = parsed;
+    saveLastData(raw, CURRENT_COUNTRY);
+    msg.textContent = `Parsed ${parsed.length} holdings. Saved on this device.`;
+    document.getElementById('asof').textContent = new Date().toLocaleString('en-IN', {dateStyle:'medium', timeStyle:'short'});
+    renderAll();
+    renderOverview();
+  }, 550);
+});
+
+document.getElementById('sampleBtn').addEventListener('click', ()=>{
+  document.getElementById('rawInput').value =
+    CURRENT_COUNTRY === 'US' ? SAMPLE_US :
+    CURRENT_COUNTRY === 'BONDS' ? SAMPLE_BONDS : SAMPLE;
+});
+
+document.getElementById('shareBtn').addEventListener('click', async ()=>{
+  const raw = document.getElementById('rawInput').value.trim();
+  const msg = document.getElementById('parseMsg');
+  if(!raw){ msg.textContent = 'Paste and build your holdings first, then copy the link.'; return; }
+  const url = window.location.origin + window.location.pathname + '#data=' + encodeURIComponent(encodeForLink({ raw, country: CURRENT_COUNTRY }));
+  try{
+    await navigator.clipboard.writeText(url);
+    msg.textContent = 'Link copied — open it on your phone to see the same tables.';
+  }catch(e){
+    // Clipboard API can fail without a user-gesture context in some browsers;
+    // fall back to showing the link so it can be copied by hand.
+    msg.textContent = 'Copy this link: ' + url;
+  }
+});
+
+// Load order: a shared link's data takes priority (that's an explicit share),
+// then whatever this device last built *for the last-active tab*, then the
+// bundled sample. Country must be applied before parsing, since it
+// determines which parser and currency formatting the initial data needs.
+window.addEventListener('DOMContentLoaded', ()=>{
+  const fromLink = getDataFromUrl();
+  let initialRaw, initialCountry;
+  if(fromLink){
+    initialCountry = fromLink.country || 'IN';
+    initialRaw = fromLink.raw;
+  } else {
+    initialCountry = loadLastActiveCountry();
+    const fromStorage = loadLastData(initialCountry);
+    initialRaw = fromStorage ? fromStorage.raw :
+      (initialCountry === 'US' ? SAMPLE_US : initialCountry === 'BONDS' ? SAMPLE_BONDS : SAMPLE);
+  }
+  applyCountry(initialCountry);
+  document.getElementById('rawInput').value = initialRaw;
+  parseBtn.click();
+  renderOverview();
+});
+</script>
+</body>
+
+</html>
